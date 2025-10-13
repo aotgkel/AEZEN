@@ -11,8 +11,8 @@
 	</page_setting>
 	<category_index>0</category_index>
 	<zoom>1.0</zoom>
-	<x>182</x>
-	<y>0</y>
+	<x>544</x>
+	<y>13</y>
 	<default_color>
 		<r>128</r>
 		<g>128</g>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2024-11-22 16:17:11</creation_date>
-			<updated_date>2025-10-13 11:02:05</updated_date>
+			<updated_date>2025-10-13 11:08:37</updated_date>
 			<model_property>
 				<name>프로젝트명</name>
 				<value></value>
@@ -295,7 +295,7 @@
 			<binary>false</binary>
 			<args></args>
 			<char_semantics>false</char_semantics>
-			<description>1: 자유게시판&#x0D;&#x0A;2: Q&amp;A&#x0D;&#x0A;3: 코딩테스트</description>
+			<description>1: 자유게시판&#x0D;&#x0A;2: Q&amp;A&#x0D;&#x0A;3: 코딩테스트&#x0D;&#x0A;4: 공지사항&#x0D;&#x0A;5: 이용약관&#x0D;&#x0A;6: 개인정보처리방침</description>
 			<logical_name>카테고리</logical_name>
 			<physical_name>board_category</physical_name>
 			<type>integer</type>
