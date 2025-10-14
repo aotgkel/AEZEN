@@ -19,23 +19,67 @@ public class HomeController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	/**
-	 * Simply selects the home view to render by returning its name.
-	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
-		logger.info("Welcome home! The client locale is {}.", locale);
+	@RequestMapping(value = "/home.do", method = RequestMethod.GET)
+	public String home() {
+
 		
-		logger.info("home 컨트롤러...!");
-		
-		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
-		String formattedDate = dateFormat.format(date);
-		
-		model.addAttribute("serverTime", formattedDate );
-		
-		return "home";
+
+		return "main/home";
 	}
 	
+	@RequestMapping(value = "/write.do", method = RequestMethod.GET)
+	public String write(Locale locale, Model model) {
+
+		
+		return "main/write";
+	}
+	
+	@RequestMapping(value = "/info.do", method = RequestMethod.GET)
+	public String info(Locale locale, Model model) {
+		
+		
+		return "main/info";
+	}
+	
+	@RequestMapping(value = "/pointstore.do", method = RequestMethod.GET)
+	public String pointstore(Locale locale, Model model) {
+		
+		
+		return "main/pointstore"; 
+	}
+	
+	@RequestMapping(value = "/minigame.do", method = RequestMethod.GET)
+	public String minigame(Locale locale, Model model) {
+		
+		
+		return "main/minigame";
+	}
+	
+	@RequestMapping(value = "/mypage.do", method = RequestMethod.GET)
+	public String mypage(Locale locale, Model model) {
+		
+		
+		return "main/mypage";
+	}
+	
+	@RequestMapping(value = "/join_agree.do", method = RequestMethod.GET)
+	public String join_agree(Locale locale, Model model) {
+		
+		
+		return "account/join_agree";
+	}
+	
+	@RequestMapping(value = "/join_find.do", method = RequestMethod.GET)
+	public String join_find(Locale locale, Model model) {
+		
+		
+		return "account/join_find";
+	}
+	
+	@RequestMapping(value = "/join_info.do", method = RequestMethod.GET)
+	public String join_info(Locale locale, Model model) {
+		
+		
+		return "account/join_info";
+	}
 }
