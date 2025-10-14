@@ -19,7 +19,7 @@ public class HomeController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	@RequestMapping(value = "/home.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/home", method = RequestMethod.GET)
 	public String home() {
 
 		
@@ -27,56 +27,56 @@ public class HomeController {
 		return "main/home";
 	}
 	
-	@RequestMapping(value = "/write.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/write", method = RequestMethod.GET)
 	public String write(Locale locale, Model model) {
 
 		
 		return "main/write";
 	}
 	
-	@RequestMapping(value = "/info.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/info", method = RequestMethod.GET)
 	public String info(Locale locale, Model model) {
 		
 		
 		return "main/info";
 	}
 	
-	@RequestMapping(value = "/pointstore.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/pointstore", method = RequestMethod.GET)
 	public String pointstore(Locale locale, Model model) {
 		
 		
 		return "main/pointstore"; 
 	}
 	
-	@RequestMapping(value = "/minigame.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/minigame", method = RequestMethod.GET)
 	public String minigame(Locale locale, Model model) {
 		
 		
 		return "main/minigame";
 	}
 	
-	@RequestMapping(value = "/mypage.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/mypage", method = RequestMethod.GET)
 	public String mypage(Locale locale, Model model) {
 		
 		
 		return "main/mypage";
 	}
 	
-	@RequestMapping(value = "/join_agree.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/join_agree", method = RequestMethod.GET)
 	public String join_agree(Locale locale, Model model) {
 		
 		
 		return "account/join_agree";
 	}
 	
-	@RequestMapping(value = "/join_find.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/join_find", method = RequestMethod.GET)
 	public String join_find(Locale locale, Model model) {
 		
 		
 		return "account/join_find";
 	}
 	
-	@RequestMapping(value = "/join_info.do", method = RequestMethod.GET)
+	@RequestMapping(value = "/join_info", method = RequestMethod.GET)
 	public String join_info(Locale locale, Model model) {
 		
 		
