@@ -6,6 +6,7 @@
   <meta charset="utf-8">
   <title>AEZEN 일반인 EZEN 개발자</title>
   <link rel="stylesheet" href="resources/css/home.css">
+  <script src="resources/js/jquery-3.7.1.min.js"></script>
   <script src="resources/js/home.js"></script>
 </head>
   <!---------------- 헤더영역 ---------------------->
@@ -25,23 +26,33 @@
         </a>
       </div>
     </div>
-    <!-- 로그인박스 (초기 보임) -->
-    <div class="login-box">
-      <input type="text" id="loginId" placeholder="ID 입력">
-      <input type="password" id="loginPw" placeholder="PW 입력">
-      <div class="login-options">
-        <label><input type="checkbox" id="rememberMe"> ID 기억하기</label>
-        <a href="join_find">ID/PW 찾기</a>
-        <a href="join_agree">회원가입</a>
+  <!-- 헤더 내 비어있는 공간 확보용 -->
+  <div style="flex-grow: 1;"></div>
+
+  <!-- 로그인 / 아이콘 조건 분기 -->
+  <c:choose>
+    <c:when test="${empty sessionScope.login}">
+      <!-- ⚙️ header 안에서 absolute 위치가 잡히도록 header 바로 아래에 둔다 -->
+      <div class="login-box">
+        <input type="text" id="loginId" placeholder="ID 입력">
+        <input type="password" id="loginPw" placeholder="PW 입력">
+        <div class="login-options">
+          <label><input type="checkbox" id="rememberMe"> ID 기억하기</label>
+          <a href="join_find">ID/PW 찾기</a>
+          <a href="join_agree">회원가입</a>
+        </div>
+        <button id="loginBtn">로그인</button>
       </div>
-      <button id="loginBtn">로그인</button>
-    </div>
-    <!-- 아이콘 (초기 숨김) -->
-    <div class="icons" style="display:none;">
-      <button id="btnMyPage" data-tooltip="마이페이지">👨</button>
-      <button id="btnNotify" data-tooltip="알림">🔔</button>
-      <button id="btnMsg" data-tooltip="메세지">📬</button>
-      <button id="btnTrophy" data-tooltip="포인트">🏆</button>
-      <button id="btnLogout" data-tooltip="로그아웃">🔑</button>
-    </div>
+    </c:when>
+
+    <c:otherwise>
+      <div class="icons">
+        <button id="btnMyPage" data-tooltip="마이페이지">👨</button>
+        <button id="btnNotify" data-tooltip="알림">🔔</button>
+        <button id="btnMsg" data-tooltip="메세지">📬</button>
+        <button id="btnTrophy" data-tooltip="포인트">🏆</button>
+        <button id="btnLogout" data-tooltip="로그아웃">🔑</button>
+      </div>
+    </c:otherwise>
+  </c:choose>
   </header>
