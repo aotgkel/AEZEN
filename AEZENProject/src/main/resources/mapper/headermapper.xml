@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
+<mapper namespace="com.aezen.www.header">
+
+	<!-- 로그인 -->
+    <select id="login" parameterType="com.aezen.www.vo.UserVO"
+        resultType="com.aezen.www.vo.UserVO">
+        SELECT *
+        FROM user
+        WHERE id = #{id}
+        AND password = #{password}
+        AND withdraw = 0
+    </select>
+    
+    <!-- 마지막 로그인 시간 업데이트 -->
+	<update id="updateLastLoginAt" parameterType="string">
+	    UPDATE user
+	    SET last_login_at = NOW(),
+	        updated_at = updated_at
+	    WHERE id = #{id}
+	</update>
+
+</mapper>

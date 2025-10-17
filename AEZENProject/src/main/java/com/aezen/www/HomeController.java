@@ -19,13 +19,6 @@ public class HomeController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
-	@RequestMapping(value = "/home", method = RequestMethod.GET)
-	public String home() {
-
-		
-
-		return "main/home";
-	}
 	
 	@RequestMapping(value = "/write", method = RequestMethod.GET)
 	public String write(Locale locale, Model model) {

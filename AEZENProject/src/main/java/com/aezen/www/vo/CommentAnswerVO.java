@@ -12,8 +12,8 @@ public class CommentAnswerVO {
     private String commentAnswerContent; // 댓글/답변 내용
     private int commentLikeCount; // 좋아요 수
     private int commentDislikeCount; // 싫어요 수
-    private LocalDateTime commentAnswerAt; // 작성일시
-    private LocalDateTime commentAnswerUpdatedAt; // 수정일시
+    private String commentAnswerAt; // 작성일시
+    private String commentAnswerUpdatedAt; // 수정일시
     private int commentAnswerType; // 타입 (0: 댓글, 1: 답변)
     private boolean answerAccepted; // 답변 채택 여부 (boolean 타입)
 
@@ -45,11 +45,11 @@ public class CommentAnswerVO {
         return commentDislikeCount;
     }
 
-    public LocalDateTime getCommentAnswerAt() {
+    public String getCommentAnswerAt() {
         return commentAnswerAt;
     }
 
-    public LocalDateTime getCommentAnswerUpdatedAt() {
+    public String getCommentAnswerUpdatedAt() {
         return commentAnswerUpdatedAt;
     }
 
@@ -90,11 +90,11 @@ public class CommentAnswerVO {
         this.commentDislikeCount = commentDislikeCount;
     }
 
-    public void setCommentAnswerAt(LocalDateTime commentAnswerAt) {
+    public void setCommentAnswerAt(String commentAnswerAt) {
         this.commentAnswerAt = commentAnswerAt;
     }
 
-    public void setCommentAnswerUpdatedAt(LocalDateTime commentAnswerUpdatedAt) {
+    public void setCommentAnswerUpdatedAt(String commentAnswerUpdatedAt) {
         this.commentAnswerUpdatedAt = commentAnswerUpdatedAt;
     }
 

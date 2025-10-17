@@ -15,8 +15,8 @@
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost:3306/boarddb?serverTimezone=Asia/Seoul&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
-		<property name="username" value="root" />
+		<property name="url" value="jdbc:mysql://192.168.0.180/aezen?serverTimezone=Asia/Seoul&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
+		<property name="username" value="jwh" />
 		<property name="password" value="ezen" />
 	</bean>
 	
@@ -51,8 +51,8 @@
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.naver.com" />
 		<property name="port" value="465" />
-		<property name="username" value="mailguru" />
-		<property name="password" value="6MQ9RBLL2U2K" />
+		<property name="username" value="jjibask" />
+		<property name="password" value="FKDDFYXYYXCY" />
 		<property name="defaultEncoding" value="utf-8" />
 		<property name="javaMailProperties">
 			<props>

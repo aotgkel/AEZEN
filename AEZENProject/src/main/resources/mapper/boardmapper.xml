@@ -1,98 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
- 
+
+
 <!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
-<mapper namespace="com.ezen.board">
-<!-- 
-	<insert id="insert" parameterType="com.ezen.vo.BoardVO" 
-		useGeneratedKeys="true" keyProperty="no">
-		insert into board (userid,title,kind,note,pname,fname) 
-		values (#{userid},#{title},#{kind},#{note},
-		<if test='fname != null and !fname.equals("")'>
-			#{pname},#{fname}
-		</if> 
-		<if test='fname == null or fname.equals("")'>
-			null, null
-		</if>
-		)		
-	</insert>
-	
-	<select id="view" parameterType="java.lang.String" 
-			resultType="com.ezen.vo.BoardVO">
-		select 
-			no,userid,title,kind,note,pname,fname,wdate,hit,
-			(select name from user where userid = board.userid) as name
-		from board
-		where no = #{ no }
+<mapper namespace="com.aezen.www.board">
+
+	<resultMap type="com.aezen.www.vo.BoardVO" id="board">
+		<id property="boardNo" column="board_no" />
+		<result property="id" column="nick"/>
+		<result property="boardTitle" column="board_title"/>
+		<result property="boardContent" column="board_content" />
+	    <result property="boardCategory" column="board_category" />
+	    <result property="hit" column="hit" />
+	    <result property="boardLike" column="board_like" />
+	    <result property="boardDislike" column="board_dislike" />
+	    <result property="boardCreatedAt" column="board_created_at" />
+	    <result property="boardUpdatedAt" column="board_updated_at" />
+	    <result property="board_deleted" column="board_deleted" /> 
+	    <collection property="comments" ofType="com.aezen.www.vo.CommentAnswerVO">
+	        <id property="commentAnswerNo" column="comment_answer_no" />
+		    <result property="boardNo" column="board_no" />
+		    <result property="id" column="commenter_nick" />
+		    <result property="commentAnswerContent" column="comment_answer_content" />
+		    <result property="commentLikeCount" column="comment_like_count" />
+		    <result property="commentDislikeCount" column="comment_dislike_count" />
+		    <result property="commentAnswerAt" column="comment_answer_at" />
+		    <result property="commentAnswerUpdatedAt" column="comment_answer_updated_at" />
+		    <result property="commentAnswerType" column="comment_answer_type" />
+		    <result property="answerAccepted" column="answer_accepted" />
+	    </collection>
+	    <collection property="files" ofType="com.aezen.www.vo.FileVO">
+	    	<id property="fileNo" column="file_no" />
+		    <result property="logicalFileName" column="logical_file_name" />
+		    <result property="physicalFileName" column="physical_file_name" />
+		    <result property="fileSize" column="file_size" />
+		    <result property="fileExt" column="file_ext" />
+		    <result property="boardNo" column="board_no" />
+	    </collection>
+	    <collection property="tags" ofType="com.aezen.www.vo.TagVO">
+	    	<result property="tagName" column="tag_name"/>
+	    </collection>
+	</resultMap>
+
+	<!-- 공지사항 최신글 제목만 보여주기 -->
+	<select id="selectLatestNoticeTitle" resultType="string">
+	    SELECT board_title
+	    FROM board
+	    WHERE board_category = 4
+	    ORDER BY board_no DESC
+	    LIMIT 1
 	</select>
 	
-	<update id="hit" parameterType="java.lang.String">
-		update board set hit = hit + 1
-		where no = #{ no }
-	</update>
-	
-	<update id="update" parameterType="com.ezen.vo.BoardVO">
-		update board set
-		title = #{ title },
-		note = #{ note },		
-		<if test='fname != null and !fname.equals("")'>
-			pname = #{pname},
-			fname = #{fname},
-		</if> 		
-		kind = #{ kind }
-		where no = #{ no }		
-	</update>
-	
-	<delete id="delete_reply" parameterType="java.lang.String">
-		delete from reply
-		where no = #{ no }
-	</delete>
-		
-	<delete id="delete" parameterType="java.lang.String">
-		delete from board
-		where no = #{ no }
-	</delete>
-	
-	<select id="total" parameterType="com.ezen.vo.SearchVO"
-		resultType="java.lang.Integer">
-		select count(*) as total
+	<!-- 게시글 상세내역 볼러오기 -->
+	<select id="selectBoardList" resultMap="board">
+		select
+			board.*,
+			comment_answer.*,
+			user.nick as nick,
+			comment_user.nick as commenter_nick,
+			file.*,
+			tag.tag_name
 		from board
-		where kind = #{ kind } 
-		<if test='keyword != null and !keyword.equals("")'>
-			and title like '%${ keyword }%'
-		</if>
+		left join user on board.id = user.id
+		left join file on board.board_no = file.board_no
+		left join tag_board on tag_board.board_no = board.board_no
+		left join tag on tag.tag_no = tag_board.tag_no
+		left join comment_answer on board.board_no = comment_answer.board_no
+		left join user comment_user on comment_answer.id = comment_user.id
+		WHERE board.board_deleted = 0
 	</select>
-	
-	<select id="list" parameterType="com.ezen.vo.SearchVO"
-		resultType="com.ezen.vo.BoardVO">
-		select no,title,date(wdate) as wdate,hit,
-		(select name from user where userid = board.userid) as name,
-		(select count(*) from reply where no = board.no) as rcount
-		from board
-		where kind = #{ kind } 
-		<if test='keyword != null and !keyword.equals("")'>
-			and title like '%${ keyword }%'
-		</if>
-		order by no desc
-		limit #{offset},10		
-	</select>
-	
-	<insert id="reply_insert" parameterType="com.ezen.vo.ReplyVO" 
-			useGeneratedKeys="true" keyProperty="rno">
-		insert into reply (no, userid, rnote)
-		values (#{no}, #{userid}, #{rnote})
-	</insert>	
-		
-	<select id="reply_list" parameterType="java.lang.String" 
-			resultType="com.ezen.vo.ReplyVO">
-		select rno,userid,rnote,date(rwdate) as rwdate,
-		(select name from user where userid = reply.userid) as name
-		from reply
-		where no = #{no}
-		order by rno desc
-	</select>		
-	
-	<delete id="reply_delete" parameterType="java.lang.String">
-		delete from reply where rno = #{rno}
-	</delete>		 -->
+
 </mapper>
