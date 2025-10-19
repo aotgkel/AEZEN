@@ -183,7 +183,10 @@
 										<span class="c-text"><c:out
 												value="${comment.commentAnswerContent}" /></span>
 										<div class="c-votes">
-											<span class="comment-up">👍</span> <span class="comment-down">👎</span>
+											<span class="comment-up"> <c:out
+										value="${comment.commentLikeCount}" /> 👍</span>
+										<span class="comment-down"><c:out
+										value="${comment.commentDislikeCount}" /> 👎</span>
 										</div>
 										<div class="comment-actions">
 											<span class="edit-btn">수정</span>

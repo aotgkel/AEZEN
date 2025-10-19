@@ -1,4 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // === 상수 정의 ===
+    const REMEMBER_ID_KEY = "rememberedId";
+    const POST_BODY_MAX_LENGTH = 100;
+
+    // 현재 페이지의 컨텍스트 경로 계산 (예: "/app" 또는 "")
+    const contextPath = window.location.pathname.split('/')[1] ? `/${window.location.pathname.split('/')[1]}` : '';
+
+    // === 유틸리티 함수 ===
+
+    /**
+     * HTML 엔티티 이스케이프: XSS 방지.
+     * @param {string} str 이스케이프할 문자열
+     * @returns {string} 이스케이프된 문자열
+     */
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
     /**
      * 쿠키 값을 설정하는 함수
@@ -8,14 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     function setCookie(name, value, days) {
         let expires = "";
-        // days가 0인 경우 (삭제 요청)에도 만료일을 과거로 설정하기 위해 조건 검사
         if (days >= 0) {
             const date = new Date();
-            // 30일을 설정하거나, 0일 (즉시 삭제) 또는 기타 기간 설정
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
             expires = "; expires=" + date.toUTCString();
         }
-        // path=/ 설정으로 모든 페이지에서 쿠키 접근 가능하도록 함
         document.cookie = name + "=" + value + expires + "; path=/";
     }
 
@@ -35,33 +54,37 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
     }
 
-    /************* 공통 이벤트 *************/
+    // === DOM 요소 캐싱 ===
     const loginBtn = document.getElementById("loginBtn");
-    const iconButtons = document.querySelectorAll("header .icons button");
     const loginIdInput = document.getElementById("loginId");
+    const loginPwInput = document.getElementById("loginPw"); // 추가: loginPw 엘리먼트를 캐싱
     const rememberMeCheckbox = document.getElementById("rememberMe");
-    let activeBalloon = null;
+    const iconButtons = document.querySelectorAll("header .icons button");
+    const topButtons = document.querySelectorAll(".top-buttons button");
+    const feedButtons = document.querySelectorAll(".feed-buttons button");
+    const writeBtn = document.getElementById("writeBtn");
+    const reportModal = document.getElementById("reportModal");
+    const reportForm = document.getElementById("reportForm");
+    const cancelBtn = document.getElementById("cancelBtn");
+    let activeBalloon = null; // 아이콘 버튼 툴팁/풍선
+    let searchBox = null; // 인라인 검색창
 
-    // 현재 페이지 컨텍스트 경로 계산 (home.jsp 포함)
-    const contextPath = window.location.pathname.split('/')[1] ? `/${window.location.pathname.split('/')[1]}` : '';
-
+    // === 초기화: 아이디 기억하기 (Remember Me) 로직 ===
     if (loginIdInput && rememberMeCheckbox) {
         const rememberedId = getCookie(REMEMBER_ID_KEY);
         if (rememberedId) {
-            // 쿠키에 저장된 아이디가 있으면 입력란에 채우고 체크박스 체크
             loginIdInput.value = rememberedId;
             rememberMeCheckbox.checked = true;
         }
     }
 
-    /** 1️⃣ 로그인 기능 **/
-    if (loginBtn) {
+    // === 1. 로그인 기능 처리 ===
+    if (loginBtn && loginIdInput && loginPwInput && rememberMeCheckbox) {
         loginBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            const id = loginIdInput.value.trim(); // 변수 사용
-            const pw = document.getElementById("loginPw").value.trim();
-            // 🔥 추가된 부분: ID 기억하기 체크 여부 확인 🔥
-            const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
+            const id = loginIdInput.value.trim();
+            const pw = loginPwInput.value.trim();
+            const rememberMe = rememberMeCheckbox.checked;
 
             if (!id || !pw) {
                 alert("아이디와 비밀번호를 입력하세요.");
@@ -76,28 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.text())
             .then(result => {
                 if (result.trim() === 'true') {
-                    
-                    // 🔥 추가된 부분: 로그인 성공 시 ID 기억하기 쿠키 처리 🔥
-                    if (rememberMe) {
-                        // 체크 시: ID를 30일간 쿠키에 저장
-                        setCookie(REMEMBER_ID_KEY, id, 30);
-                    } else {
-                        // 체크 해제 시: 쿠키를 즉시 삭제 (만료 기간 0일)
-                        setCookie(REMEMBER_ID_KEY, "", 0); 
-                    }
-                    // 🔥 추가된 부분 끝 🔥
-
+                    // 로그인 성공 시 ID 기억하기 쿠키 처리
+                    setCookie(REMEMBER_ID_KEY, id, rememberMe ? 30 : 0);
                     alert("로그인 성공!");
                     window.location.href = `${contextPath}/home`;
                 } else {
                     alert("아이디 또는 비밀번호가 일치하지 않습니다.");
-                    
-                    // ID와 PW 입력 필드 리셋
-                    document.getElementById("loginId").value = "";
-                    document.getElementById("loginPw").value = "";
-                    
-                    // ID 입력 필드에 포커스
-                    document.getElementById("loginId").focus();
+                    loginIdInput.value = "";
+                    loginPwInput.value = "";
+                    loginIdInput.focus();
                 }
             })
             .catch(err => {
@@ -107,24 +117,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /** 2️⃣ 로그인 아이콘 버튼 동작 (마이페이지, 로그아웃, 기타 balloon) **/
+    // === 2. 헤더 아이콘 버튼 (마이페이지, 로그아웃, 풍선말) ===
     iconButtons.forEach(btn => {
         btn.addEventListener("click", (e) => {
             const tooltip = btn.getAttribute("data-tooltip");
 
-            // 마이페이지 이동
             if (tooltip === "마이페이지") {
                 window.location.href = `${contextPath}/mypage`;
                 return;
             }
 
-            // 로그아웃
             if (tooltip === "로그아웃") {
                 if (!confirm('로그아웃 하시겠습니까?')) return;
-
                 fetch(`${contextPath}/logout`, { method: 'POST' })
                     .then(() => {
-                        // 🔥 요구사항 반영: 로그아웃 시 ID 기억하기 쿠키는 삭제하지 않음 🔥
+                        // 로그아웃 시 ID 기억하기 쿠키는 유지됨
                         alert("로그아웃 되었습니다.");
                         window.location.href = `${contextPath}/home`;
                     })
@@ -135,75 +142,83 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // 기존 balloon 제거
+            // 풍선말 표시 로직
             if (activeBalloon) {
                 activeBalloon.remove();
                 activeBalloon = null;
             }
-
-            // balloon 생성 후 body에 붙임
+            if (btn.classList.contains('active-balloon')) { // 현재 버튼이 활성화되어 있으면 닫기
+                btn.classList.remove('active-balloon');
+                return;
+            }
+            
+            // 새 풍선말 생성
             const balloon = document.createElement("div");
             balloon.className = "balloon";
             balloon.textContent = `${tooltip} 요약 정보가 표시됩니다.`;
             document.body.appendChild(balloon);
+            btn.classList.add('active-balloon'); // 현재 버튼 활성화 표시
 
-            // 버튼 화면 좌표 기준 위치 지정
             const rect = btn.getBoundingClientRect();
             balloon.style.position = "absolute";
-            balloon.style.top = `${rect.bottom + window.scrollY + 8}px`;
+            // 스크롤 위치를 고려하여 위치 지정
+            balloon.style.top = `${rect.bottom + window.scrollY + 8}px`; 
             balloon.style.left = `${rect.left + window.scrollX}px`;
 
             activeBalloon = balloon;
 
-            // 클릭하면 balloon 닫기
-            document.addEventListener("click", function closeBalloon(ev) {
+            // 풍선말 외부 클릭 시 닫기
+            function closeBalloon(ev) {
                 if (!btn.contains(ev.target) && !balloon.contains(ev.target)) {
                     balloon.remove();
                     activeBalloon = null;
+                    btn.classList.remove('active-balloon');
                     document.removeEventListener("click", closeBalloon);
                 }
-            });
+            }
+            document.addEventListener("click", closeBalloon);
         });
     });
 
-    // 3. 정렬버튼 선택됨 상태 및 초기값 설정
-    const topButtons = document.querySelectorAll(".top-buttons button");
-    // ... (이하 모든 기존 코드는 그대로 유지됨)
-    const feedButtons = document.querySelectorAll(".feed-buttons button");
-    if (topButtons.length > 0) topButtons[0].classList.add("active");
-    if (feedButtons.length > 0) feedButtons[0].classList.add("active");
-
+    // === 3. 정렬 버튼 상태 및 인라인 검색창 ===
+    // 버튼 활성화 함수
     function setActive(buttons, clicked) {
         buttons.forEach(btn => btn.classList.remove("active"));
         clicked.classList.add("active");
     }
+    
+    // 초기 활성화 상태 설정
+    if (topButtons.length > 0) topButtons[0].classList.add("active");
+    if (feedButtons.length > 0) feedButtons[0].classList.add("active");
+    
+    // 이벤트 리스너 연결
     topButtons.forEach(btn => {
         btn.addEventListener("click", () => setActive(topButtons, btn));
     });
     feedButtons.forEach(btn => {
         btn.addEventListener("click", () => setActive(feedButtons, btn));
     });
-    
-    // 검색순 버튼 아래 툴팁형 검색창
+
+    // '검색순' 버튼에 대한 인라인 검색창 토글 로직
     const searchBtn = Array.from(topButtons).find(
         btn => btn.textContent.includes("검색순")
     );
 
-    let searchBox = null;
-
     if (searchBtn) {
-        // 부모를 relative로 지정해줘야 position:absolute가 버튼 기준으로 잡힘
-        searchBtn.parentElement.style.position = "relative";
+        searchBtn.parentElement.style.position = "relative"; // 검색창 위치 기준 설정
 
-        searchBtn.addEventListener("click", () => {
-            // 이미 열려 있으면 닫기
+        searchBtn.addEventListener("click", (e) => {
+            // 정렬 버튼 활성화
+            setActive(topButtons, searchBtn);
+
+            // 이미 열려 있으면 닫고 종료
             if (searchBox) {
                 searchBox.remove();
                 searchBox = null;
                 return;
             }
 
-            // 검색창 생성
+            // 검색창 생성 및 DOM 추가
             searchBox = document.createElement("div");
             searchBox.className = "inline-search-box";
             searchBox.innerHTML = `
@@ -219,11 +234,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button id="inlineSearchClose">닫기</button>
                 </div>
             `;
-
-            // 버튼 컨테이너에 붙이기
             searchBtn.parentElement.appendChild(searchBox);
 
-            // 이벤트 연결
+            // 검색창 내부 요소 이벤트 연결
             const typeSelect = searchBox.querySelector("#inlineSearchType");
             const input = searchBox.querySelector("#inlineSearchInput");
             const submit = searchBox.querySelector("#inlineSearchSubmit");
@@ -234,13 +247,15 @@ document.addEventListener("DOMContentLoaded", () => {
             submit.addEventListener("click", () => {
                 const keyword = input.value.trim();
                 const type = typeSelect.value;
-
                 if (!keyword) {
                     alert("검색어를 입력하세요.");
+                    input.focus();
                     return;
                 }
-                alert(`'${keyword}'를 [${type}]에서 검색합니다.`);
-                // 🔥 여기서 실제 검색 API 연동
+                alert(`'${keyword}'를 [${type}]에서 검색합니다. (실제 검색 API 연동 필요)`);
+                // 실제 검색 로직 (API 연동 등)
+                // searchBox.remove();
+                // searchBox = null;
             });
 
             close.addEventListener("click", () => {
@@ -250,13 +265,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    
-    // 4. 사이드바 채팅-메뉴 선택 기능
+    // === 4. 사이드바 탭 (채팅-메뉴) 기능 ===
     const tabButtons = document.querySelectorAll('.sidebar-tabs .tab-button');
     const panels = document.querySelectorAll('.tab-panel');
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
+            // 버튼 상태 토글
             tabButtons.forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
@@ -264,6 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
 
+            // 패널 표시/숨김
             panels.forEach(p => {
                 p.classList.add('hidden');
                 p.setAttribute('aria-hidden', 'true');
@@ -276,309 +292,312 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    /********** 게시글 영역 이벤트 ************/
-    // 5. 통합 더보기 이벤트 (본문 확장 + 이미지 토글 + 댓글 토글)
-    const MAX_LENGTH = 100;
-
+    // === 5. 게시글 통합 더보기 (본문 확장 + 이미지 토글 + 댓글 토글) ===
     document.querySelectorAll(".post").forEach(post => {
-    const body = post.querySelector(".bnote");
-    const moreBtn = post.querySelector(".more");
-    const imageBox = post.querySelector(".post-images");
-    const comments = post.querySelector(".comments");
-    const commentForm = post.querySelector(".comment-form");
+        const body = post.querySelector(".bnote");
+        const moreBtn = post.querySelector(".more");
+        const imageBox = post.querySelector(".post-images");
+        const comments = post.querySelector(".comments");
+        const commentForm = post.querySelector(".comment-form");
 
-    if (!body || !moreBtn) return;
+        if (!body || !moreBtn) return;
 
-    // 원문 저장
-    const fullText = body.textContent.trim();
-    const shortText =
-        fullText.length > MAX_LENGTH
-            ? fullText.substring(0, MAX_LENGTH) + "..."
-            : fullText.padEnd(MAX_LENGTH, " "); // ✅ 짧아도 길이를 맞춤
+        const fullText = body.textContent.trim();
+        const needsTruncation = fullText.length > POST_BODY_MAX_LENGTH;
+        const shortText = needsTruncation 
+            ? fullText.substring(0, POST_BODY_MAX_LENGTH) + "..."
+            : fullText.padEnd(POST_BODY_MAX_LENGTH, " "); // 짧아도 길이를 맞춤 (UI/레이아웃 안정화 목적)
 
-    // 처음엔 요약본 표시
-    body.textContent = shortText;
-    let expanded = false;
+        body.textContent = shortText;
+        let expanded = false;
 
-    moreBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        expanded = !expanded;
-
-        // 1) 본문 확장/축소
-        body.textContent = expanded ? fullText : shortText;
-
-        // 2) 이미지 토글
-        if (imageBox) {
-            imageBox.style.display = expanded ? "flex" : "none";
+        // 더보기 버튼이 필요 없는 경우 숨김
+        if (!needsTruncation && !imageBox && !comments) {
+             moreBtn.style.display = 'none';
+             return;
         }
 
-        // 3) 댓글 + 입력창 토글
-        if (comments && commentForm) {
-            comments.style.display = expanded ? "block" : "none";
-            commentForm.style.display = expanded ? "flex" : "none";
-        }
+        moreBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            expanded = !expanded;
 
-        // 버튼 텍스트 변경
-        moreBtn.textContent = expanded ? "접기" : "더보기";
-    });
+            // 본문 확장/축소
+            body.textContent = expanded ? fullText : shortText;
+
+            // 이미지 토글
+            if (imageBox) {
+                imageBox.style.display = expanded ? "flex" : "none";
+            }
+
+            // 댓글 + 입력창 토글
+            if (comments && commentForm) {
+                comments.style.display = expanded ? "block" : "none";
+                commentForm.style.display = expanded ? "flex" : "none";
+            }
+
+            // 버튼 텍스트 변경
+            moreBtn.textContent = expanded ? "접기" : "더보기";
+        });
     });
 
-    // 6. 닉네임 드롭다운
+    // === 6. 닉네임 드롭다운 ===
     document.addEventListener('click', (e) => {
         const clickedDropdown = e.target.closest('.nick.dropdown');
         document.querySelectorAll('.nick.dropdown.open')
             .forEach(d => {
+                // 클릭된 드롭다운이 아니면 닫기
                 if (d !== clickedDropdown) d.classList.remove('open');
             });
         if (clickedDropdown) {
             clickedDropdown.classList.toggle('open');
-            }
-        });
+        }
+    });
 
-    // 신고모달
-    const modal = document.getElementById("reportModal");
-    const reportForm = document.getElementById("reportForm");
-    const cancelBtn = document.getElementById("cancelBtn");
-
-    if (modal) {
-        const closeBtn = modal.querySelector(".close");
+    // === 7. 신고 모달 (Report Modal) 기능 ===
+    if (reportModal) {
+        const closeBtn = reportModal.querySelector(".close");
         let currentPostId = null;
 
+        // 신고 버튼 클릭 시 모달 열기
         document.querySelectorAll(".report").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 currentPostId = e.target.dataset.postId;
-                modal.style.display = "block";
+                reportModal.style.display = "block";
             });
         });
 
-        if (closeBtn) closeBtn.addEventListener("click", () => modal.style.display = "none");
-        if (cancelBtn) cancelBtn.addEventListener("click", () => modal.style.display = "none");
+        // 닫기 버튼/취소 버튼 클릭 시 모달 닫기
+        if (closeBtn) closeBtn.addEventListener("click", () => reportModal.style.display = "none");
+        if (cancelBtn) cancelBtn.addEventListener("click", () => reportModal.style.display = "none");
 
+        // 모달 외부 클릭 시 닫기
         window.addEventListener("click", (e) => {
-            if (e.target === modal) modal.style.display = "none";
+            if (e.target === reportModal) reportModal.style.display = "none";
         });
 
+        // 신고 폼 제출 처리
         if (reportForm) {
             reportForm.addEventListener("submit", (e) => {
                 e.preventDefault();
-                const reason = document.querySelector("input[name='reason']:checked");
+                const reason = reportForm.querySelector("input[name='reason']:checked");
                 if (!reason) {
                     alert("신고 사유를 선택해주세요.");
                     return;
                 }
-                alert(`게시글 ${currentPostId}번이 '${reason.value}' 사유로 신고되었습니다.`);
-                modal.style.display = "none";
-                e.target.reset();
+                alert(`게시글 ${currentPostId}번이 '${reason.value}' 사유로 신고되었습니다. (실제 신고 API 연동 필요)`);
+                reportModal.style.display = "none";
+                reportForm.reset();
             });
         }
     }
 
-    // 8. 추천기능
-    document.querySelectorAll(".post-up").forEach(btn => {
-        btn.addEventListener("click", () => alert("게시글을 추천하셨습니다"));
-    });
-    document.querySelectorAll(".post-down").forEach(btn => {
-        btn.addEventListener("click", () => alert("게시글을 비추천하셨습니다"));
-    });
-    document.querySelectorAll(".comment-up").forEach(btn => {
-        btn.addEventListener("click", () => alert("댓글을 추천하셨습니다"));
-    });
-    document.querySelectorAll(".comment-down").forEach(btn => {
-        btn.addEventListener("click", () => alert("댓글을 비추천하셨습니다"));
+    // === 8. 추천/비추천 기능 ===
+    document.querySelectorAll(".post-up, .post-down, .comment-up, .comment-down").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const type = e.currentTarget.classList.contains('post-up') || e.currentTarget.classList.contains('post-down') ? '게시글' : '댓글/답변';
+            const action = e.currentTarget.classList.contains('up') ? '추천' : '비추천';
+            alert(`${type}을 ${action}하셨습니다. (실제 API 연동 필요)`);
+        });
     });
 
-    // 9. 답안 토글 + 채택
+    // === 9. 답변 토글 및 채택 기능 ===
+    // 답변 토글 버튼
     document.querySelectorAll('.answer-toggle .answer-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const post = btn.closest('.post');
-            if (!post) return;
-            const answers = post.querySelector('.answers');
+            const answers = post ? post.querySelector('.answers') : null;
             if (answers) answers.classList.toggle('show');
         });
     });
 
+    // 답변 채택 버튼
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.a-choice');
         if (!btn) return;
+
         e.preventDefault();
         if (!confirm('답안을 채택하시겠습니까?')) return;
 
         const answerItem = btn.closest('.answer-item');
         const textDiv = answerItem.querySelector('.a-text');
+        
+        // 채택 라벨 추가 (이미 채택된 상태가 아닌 경우에만)
         if (textDiv && !textDiv.querySelector('.chosen-label')) {
             const label = document.createElement('span');
             label.className = 'chosen-label';
             label.textContent = '채택된 답안';
             textDiv.prepend(label);
         }
+        
+        // 버튼 상태 변경
         btn.textContent = '채택 완료';
         btn.disabled = true;
         btn.classList.add('disabled');
+        alert("답변이 채택되었습니다.");
+        // 실제 채택 API 연동
     });
 
-    // 10. 글쓰기 버튼 이벤트
-    const writeBtn = document.getElementById("writeBtn");
+    // === 10. 글쓰기 버튼 이벤트 ===
     if (writeBtn) {
         writeBtn.addEventListener("click", () => {
-            window.location.href = "write.html";
+            window.location.href = "write.html"; // 실제 경로로 변경
         });
     }
 
-    // 11. 댓글/답변 수정/삭제 기능
+    // === 11. 댓글/답변/게시글 수정 및 삭제, 작성 기능 ===
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('delete-btn') && e.target.dataset.type === 'post') {
-            const post = e.target.closest('.post');
-            if (post && confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
-                post.remove();
-            }
-        } else if (e.target.classList.contains('delete-btn') && e.target.dataset.type === 'comment') {
-            const commentItem = e.target.closest('.comment-item');
-            if (commentItem && confirm('이 댓글을 삭제하시겠습니까?')) {
-                commentItem.remove();
-            }
-        } else if (e.target.classList.contains('delete-btn') && e.target.dataset.type === 'answer') {
-            const answerItem = e.target.closest('.answer-item');
-            if (answerItem && confirm('이 답변을 삭제하시겠습니까?')) {
-                answerItem.remove();
-            }
-        } else if (e.target.classList.contains('edit-btn')) {
-            const commentItem = e.target.closest('.comment-item');
-            if (commentItem) {
-                const textEl = commentItem.querySelector('.c-text');
-                const post = commentItem.closest('.post');
-                const commentForm = post.querySelector('.comment-form');
-                const textarea = commentForm.querySelector('textarea');
-                const submitBtn = commentForm.querySelector('.submit-comment');
+        const target = e.target;
+        
+        // 삭제 기능
+        if (target.classList.contains('delete-btn')) {
+            const type = target.dataset.type;
+            const item = target.closest(`.${type}-item, .post`); // 'post'의 경우 .post
+            if (!item) return;
 
-                if (textEl && textarea && submitBtn) {
-                    textarea.value = textEl.textContent.trim();
-                    textarea.dataset.editing = "true";
-                    textarea.dataset.targetId = commentItem.dataset.id;
-                    textarea.dataset.editType = "comment";
-                    submitBtn.textContent = "수정완료";
-                    textarea.focus();
+            let confirmMsg = '';
+            switch (type) {
+                case 'post': confirmMsg = '정말로 이 게시글을 삭제하시겠습니까?'; break;
+                case 'comment': confirmMsg = '이 댓글을 삭제하시겠습니까?'; break;
+                case 'answer': confirmMsg = '이 답변을 삭제하시겠습니까?'; break;
+                default: return;
+            }
+
+            if (confirm(confirmMsg)) {
+                item.remove(); // DOM에서 삭제
+                alert(`${type === 'post' ? '게시글' : type === 'comment' ? '댓글' : '답변'}이 삭제되었습니다. (실제 API 연동 필요)`);
+                // 실제 삭제 API 연동
+            }
+            return;
+        } 
+        
+        // 수정 모드 활성화 기능 (댓글/답변)
+        if (target.classList.contains('edit-btn')) {
+            const commentItem = target.closest('.comment-item');
+            const answerItem = target.closest('.answer-item');
+            let item = commentItem || answerItem;
+            if (!item) return;
+
+            const isComment = !!commentItem;
+            const post = item.closest('.post');
+            const textElSelector = isComment ? '.c-text' : '.a-text';
+            const formSelector = isComment ? '.comment-form' : '.answer-form';
+            const submitBtnSelector = isComment ? '.submit-comment' : 'button[type="submit"]';
+            
+            const textEl = item.querySelector(textElSelector);
+            const form = post.querySelector(formSelector);
+            const textarea = form ? form.querySelector('textarea') : null;
+            const submitBtn = form ? form.querySelector(submitBtnSelector) : null;
+            
+            if (textEl && textarea && submitBtn) {
+                // 답변인 경우 answers 컨테이너 펼치기
+                if (!isComment) {
+                    const answers = post.querySelector('.answers');
+                    if (answers) answers.classList.add('show');
                 }
-            } else {
-                const answerItem = e.target.closest('.answer-item');
-                if (answerItem) {
-                    const textEl = answerItem.querySelector('.a-text');
-                    const post = answerItem.closest('.post');
-                    const answerForm = post.querySelector('.answer-form');
-                    const textarea = answerForm.querySelector('textarea');
-                    const submitBtn = answerForm.querySelector('button[type="submit"]');
-
-                    if (textEl && textarea && submitBtn) {
-                        const answers = post.querySelector('.answers');
-                        answers.classList.add('show');
-                        textarea.value = textEl.textContent.trim();
-                        textarea.dataset.editing = "true";
-                        textarea.dataset.targetId = answerItem.dataset.id;
-                        textarea.dataset.editType = "answer";
-                        submitBtn.textContent = "수정완료";
-                        textarea.focus();
-                    }
-                }
+                
+                textarea.value = textEl.textContent.trim();
+                textarea.dataset.editing = "true";
+                textarea.dataset.targetId = item.dataset.id;
+                textarea.dataset.editType = isComment ? "comment" : "answer";
+                submitBtn.textContent = "수정완료";
+                textarea.focus();
             }
-        } else if (e.target.classList.contains('submit-comment')) {
-            const form = e.target.closest('.comment-form');
-            const textarea = form.querySelector('textarea');
-            const submitBtn = e.target;
+            return;
+        }
 
-            if (!textarea.value.trim()) {
-                alert('댓글 내용을 입력해주세요.');
-                return;
-            }
-
-            if (textarea.dataset.editing === "true") {
-                const targetId = textarea.dataset.targetId;
-                const post = form.closest('.post');
-                const targetComment = post.querySelector(`.comment-item[data-id="${targetId}"]`);
-                const targetText = targetComment ? targetComment.querySelector('.c-text') : null;
-
-                if (targetText) {
-                    targetText.textContent = textarea.value.trim();
-                    alert('댓글이 수정되었습니다.');
-                    textarea.dataset.editing = "false";
-                    textarea.dataset.targetId = "";
-                    textarea.dataset.editType = "";
-                    textarea.value = "";
-                    submitBtn.textContent = "작성";
-                }
-            } else {
-                const ok = confirm("등록하시겠습니까?");
-                if (ok) {
-                    alert("댓글을 작성하였습니다.");
-                    textarea.value = "";
-                }
-            }
-        } else if (e.target.type === 'submit' && e.target.closest('.answer-form')) {
+        // 댓글/답변 작성/수정 완료 기능
+        const isCommentSubmit = target.classList.contains('submit-comment');
+        const isAnswerSubmit = target.type === 'submit' && target.closest('.answer-form');
+        
+        if (isCommentSubmit || isAnswerSubmit) {
             e.preventDefault();
-            const form = e.target.closest('.answer-form');
+            const form = target.closest(isCommentSubmit ? '.comment-form' : '.answer-form');
             const textarea = form.querySelector('textarea');
-            const submitBtn = e.target;
+            const submitBtn = target;
+            const isEditing = textarea.dataset.editing === "true";
+            const editType = textarea.dataset.editType;
 
             if (!textarea.value.trim()) {
-                alert('답변 내용을 입력해주세요.');
+                alert(isCommentSubmit ? '댓글 내용을 입력해주세요.' : '답변 내용을 입력해주세요.');
+                textarea.focus();
                 return;
             }
 
-            if (textarea.dataset.editing === "true" && textarea.dataset.editType === "answer") {
+            if (isEditing && ((isCommentSubmit && editType === "comment") || (isAnswerSubmit && editType === "answer"))) {
+                // 수정 완료 로직
                 const targetId = textarea.dataset.targetId;
                 const post = form.closest('.post');
-                const targetAnswer = post.querySelector(`.answer-item[data-id="${targetId}"]`);
-                const targetText = targetAnswer ? targetAnswer.querySelector('.a-text') : null;
+                const targetSelector = isCommentSubmit ? `.comment-item[data-id="${targetId}"]` : `.answer-item[data-id="${targetId}"]`;
+                const textElSelector = isCommentSubmit ? '.c-text' : '.a-text';
+
+                const targetItem = post.querySelector(targetSelector);
+                const targetText = targetItem ? targetItem.querySelector(textElSelector) : null;
 
                 if (targetText) {
                     targetText.textContent = textarea.value.trim();
-                    alert('답변이 수정되었습니다.');
+                    alert(`${isCommentSubmit ? '댓글' : '답변'}이 수정되었습니다. (실제 API 연동 필요)`);
+                    
+                    // 수정 상태 초기화
                     textarea.dataset.editing = "false";
                     textarea.dataset.targetId = "";
                     textarea.dataset.editType = "";
                     textarea.value = "";
-                    submitBtn.textContent = "등록";
+                    submitBtn.textContent = isCommentSubmit ? "작성" : "등록";
+                    // 실제 수정 API 연동
                 }
-            } else {
-                const ok = confirm("등록하시겠습니까?");
-                if (!ok) return;
+            } else if (!isEditing) {
+                // 신규 작성 로직
+                if (!confirm("등록하시겠습니까?")) return;
 
-                const answersContainer = form.closest('.answers');
-                const answerList = answersContainer ? answersContainer.querySelector('.answer-list') : null;
-                if (!answerList) return;
+                if (isCommentSubmit) {
+                    // 댓글 작성 로직: 서버 연동 후 DOM에 추가 (여기서는 간단히 alert와 초기화만)
+                    alert("댓글을 작성하였습니다. (실제 API 연동 필요)");
+                    textarea.value = "";
+                    // 실제 작성 API 연동 및 댓글 목록 갱신
+                } else if (isAnswerSubmit) {
+                    // 답변 작성 로직: (임시로 DOM에 직접 추가)
+                    const answersContainer = form.closest('.answers');
+                    const answerList = answersContainer ? answersContainer.querySelector('.answer-list') : null;
+                    if (!answerList) return;
 
-                const existingAnswers = answerList.querySelectorAll('.answer-item');
-                let maxId = 0;
-                existingAnswers.forEach(answer => {
-                    const id = parseInt(answer.dataset.id);
-                    if (id > maxId) maxId = id;
-                });
-                const newId = maxId + 1;
+                    // 새로운 ID 생성 (임시)
+                    const existingAnswers = answerList.querySelectorAll('.answer-item');
+                    let maxId = 0;
+                    existingAnswers.forEach(answer => {
+                        const id = parseInt(answer.dataset.id);
+                        if (id > maxId) maxId = id;
+                    });
+                    const newId = maxId + 1;
 
-                const newItem = document.createElement('div');
-                newItem.className = 'answer-item';
-                newItem.dataset.id = newId;
-                newItem.innerHTML = `
-                    <div class="a-text">${escapeHtml(textarea.value.trim())}</div>
-                    <div class="a-footer">
-                        <span class="author">by 나</span>
-                        <div class="answer-actions">
-                            <span class="edit-btn">수정</span>
-                            <span class="delete-btn" data-type="answer">삭제</span>
+                    // 새 답변 항목 생성
+                    const newItem = document.createElement('div');
+                    newItem.className = 'answer-item';
+                    newItem.dataset.id = newId;
+                    newItem.innerHTML = `
+                        <div class="a-text">${escapeHtml(textarea.value.trim())}</div>
+                        <div class="a-footer">
+                            <span class="author">by 나</span>
+                            <div class="answer-actions">
+                                <span class="edit-btn">수정</span>
+                                <span class="delete-btn" data-type="answer">삭제</span>
+                            </div>
+                            <button class="a-choice">채택</button>
                         </div>
-                        <button class="a-choice">채택</button>
-                    </div>
-                `;
-                answerList.appendChild(newItem);
+                    `;
+                    answerList.appendChild(newItem);
 
-                textarea.value = '';
-                answersContainer.classList.add('show');
-                alert('답변이 작성되었습니다.');
+                    textarea.value = '';
+                    answersContainer.classList.add('show'); // 답변 목록 표시
+                    alert('답변이 작성되었습니다. (실제 API 연동 필요)');
+                }
             }
         }
     });
     
-    /************* 12. 공지사항 실시간 갱신 (추가) *************/
+    // === 12. 공지사항 실시간 갱신 (jQuery 사용) ===
     if (window.jQuery) {
         function updateNotice() {
+            // $.ajax는 jQuery를 사용하므로 window.jQuery가 있는지 확인 후 실행
             $.ajax({
                 url: `${contextPath}/latestNotice`,
                 method: 'GET',
@@ -592,21 +611,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 페이지 로드 시 즉시 갱신
-        updateNotice();
-
-        // 10초마다 갱신
-        setInterval(updateNotice, 10000);
+        updateNotice(); // 페이지 로드 시 즉시 갱신
+        setInterval(updateNotice, 10000); // 10초마다 갱신
     }
-    
 });
-
-// HTML 이스케이프 함수
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
