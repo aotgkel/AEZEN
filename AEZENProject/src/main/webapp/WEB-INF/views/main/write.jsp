@@ -16,14 +16,20 @@
 
       <!------------------------------ 글작성 폼 영역 ------------------------------------->
       <h2 class="form-title">글 작성</h2>
-      <form class="write-form">
+      <form class="write-form" action="${pageContext.request.contextPath}/write" method="post" enctype="multipart/form-data">
+      <c:if test="${not empty post}">
+	    <input type="hidden" name="boardNo" value="${post.boardNo}">
+  	  </c:if>
         <!-- 1. 카테고리 -->
         <div class="category-row">
           <label for="category">카테고리</label>
-          <select id="category" name="category">
-            <option value="free">자유</option>
-            <option value="coding">코딩테스트</option>
-            <option value="qna">Q&A</option>
+          <select id="category" name="boardCategory">
+            <option value="1" ${post.boardCategory == 1 ? 'selected' : ''}>자유</option>
+            <option value="2" ${post.boardCategory == 2 ? 'selected' : ''}>코딩테스트</option>
+            <option value="3" ${post.boardCategory == 3 ? 'selected' : ''}>Q&A</option>
+            <option value="4" ${post.boardCategory == 4 ? 'selected' : ''}>공지사항</option>
+            <option value="5" ${post.boardCategory == 5 ? 'selected' : ''}>이용약관</option>
+            <option value="6" ${post.boardCategory == 6 ? 'selected' : ''}>개인정보처리방침</option>
           </select>
 
           <div id="extraCategory" class="extra-category"></div>
@@ -32,32 +38,50 @@
         <!-- 2. 제목 -->
         <div>
           <label for="title">제목</label>
-          <input type="text" id="title" name="title" placeholder="제목을 입력하세요">
+          <input type="text" id="title" name="boardTitle"
+          value="${post.boardTitle != null ? post.boardTitle : ''}"
+          placeholder="제목을 입력하세요">
         </div>
 
         <!-- 3. 내용 -->
         <div>
           <label for="content">내용</label>
-          <textarea id="content" name="content" placeholder="내용을 입력하세요"></textarea>
+          <textarea id="content" name="boardContent" placeholder="내용을 입력하세요">${post.boardContent != null ? post.boardContent : ''}</textarea>
         </div>
 
         <!-- 4. 해시태그 -->
         <div>
           <label for="hashtags">해시태그</label>
-          <input type="text" id="hashtags" name="hashtags" placeholder="#태그를 입력하세요 (쉼표로 구분)">
+          <input type="text" id="hashtags" name="tagName"
+          value="${not empty tagString ? tagString : ''}" 
+          placeholder="태그를 입력하세요 (쉼표로 구분)">
         </div>
 
         <!-- 5. 파일 업로드 + 버튼 한 줄 -->
         <div class="form-bottom">
           <div class="file-upload-wrapper">
             <label for="fileUpload" class="file-upload-label">파일 선택</label>
-            <input type="file" id="fileUpload" name="fileUpload">
+            <input type="file" id="fileUpload" name="attach">
             <span class="file-name">선택된 파일 없음</span>
           </div>
+          <c:if test="${not empty post.files}">
+			  <div class="existing-files">
+			    <label>기존 첨부 파일:</label>
+			    <ul>
+			      <c:forEach var="file" items="${post.files}">
+			        <li>
+			          <a href="${pageContext.request.contextPath}/download?no=${file.fileNo}" target="_blank">
+			            ${file.logicalFileName}
+			          </a>
+			        </li>
+			      </c:forEach>
+			    </ul>
+			  </div>
+			</c:if>
 
           <div class="form-actions">
             <button type="submit" class="btn-submit">등록</button>
-            <button type="button" class="btn-cancel" onclick="window.location.href='home.html'">취소</button>
+            <button type="button" class="btn-cancel" onclick="window.location.href='${pageContext.request.contextPath}/home'">취소</button>
           </div>
         </div>
       </form>

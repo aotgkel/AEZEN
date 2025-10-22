@@ -1,19 +1,29 @@
 package com.aezen.www.vo;
 
 public class SearchVO {
-	private String searchType;
-	private String orderType;
 	
-	protected String getSearchType() {
-		return searchType;
+	public SearchVO(String type, String order) {
+		this.type = type;
+		this.order = order;
 	}
-	protected void setSearchType(String searchType) {
-		this.searchType = searchType;
+	
+	public SearchVO() {
 	}
-	protected String getOrderType() {
-		return orderType;
+
+
+	private String type;
+	private String order;
+	
+	public String getType() {
+		return type;
 	}
-	protected void setOrderType(String orderType) {
-		this.orderType = orderType;
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getOrder() {
+		return order;
+	}
+	public void setOrder(String order) {
+		this.order = order;
 	}
 }

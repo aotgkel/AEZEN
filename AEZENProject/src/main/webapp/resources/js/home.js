@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+
+	let category = 0;
+	let sort = "latest";
+	
+	
     // === 상수 정의 ===
     const REMEMBER_ID_KEY = "rememberedId";
     const POST_BODY_MAX_LENGTH = 100;
@@ -192,9 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (feedButtons.length > 0) feedButtons[0].classList.add("active");
     
     // 이벤트 리스너 연결
-    topButtons.forEach(btn => {
+    /*topButtons.forEach(btn => {
         btn.addEventListener("click", () => setActive(topButtons, btn));
-    });
+    });*/
     feedButtons.forEach(btn => {
         btn.addEventListener("click", () => setActive(feedButtons, btn));
     });
@@ -299,6 +305,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const imageBox = post.querySelector(".post-images");
         const comments = post.querySelector(".comments");
         const commentForm = post.querySelector(".comment-form");
+        post.commentList = post.querySelector('.comments');   // 댓글 리스트
+        post.commentFormEl = post.querySelector('.comment-form'); // 댓글 입력 폼
+        post.answerList = post.querySelector('.answers .answer-list'); // 답변 리스트
+        post.answerFormEl = post.querySelector('.answer-form'); // 답변 입력 폼
+        
 
         if (!body || !moreBtn) return;
 
@@ -391,24 +402,66 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // === 8. 추천/비추천 기능 ===
-    document.querySelectorAll(".post-up, .post-down, .comment-up, .comment-down").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const type = e.currentTarget.classList.contains('post-up') || e.currentTarget.classList.contains('post-down') ? '게시글' : '댓글/답변';
-            const action = e.currentTarget.classList.contains('up') ? '추천' : '비추천';
-            alert(`${type}을 ${action}하셨습니다. (실제 API 연동 필요)`);
-        });
+// 8. === 추천/비추천 (게시글 + 댓글) ===
+const postsContainer = document.getElementById('postContainer');
+postsContainer.addEventListener('click', e => {
+    const btn = e.target.closest('.post-up, .post-down, .comment-up, .comment-down');
+    if (!btn) return;
+
+    let type, action;
+
+    if (btn.classList.contains('post-up')) { type = 'post'; action = 'like'; }
+    else if (btn.classList.contains('post-down')) { type = 'post'; action = 'dislike'; }
+    else if (btn.classList.contains('comment-up')) { type = 'comment'; action = 'like'; }
+    else if (btn.classList.contains('comment-down')) { type = 'comment'; action = 'dislike'; }
+    else return;
+
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    fetch(`${contextPath}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `type=${type}&action=${action}&id=${id}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.message || '오류가 발생했습니다.');
+            return;
+        }
+
+        if (type === 'post') {
+            const postEl = btn.closest('.post');
+            const postUpBtn = postEl.querySelector('.post-up');
+            const postDownBtn = postEl.querySelector('.post-down');
+
+            if (action === 'like') postUpBtn.textContent = `추천 ${data.count} 👍`;
+            else postDownBtn.textContent = `비추천 ${data.count} 👎`;
+        } else if (type === 'comment') {
+            btn.textContent = `${data.count} ${action === 'like' ? '👍' : '👎'}`;
+        }
+
+        // 사용자에게 알림
+        alert(`${type === 'post' ? '게시글' : '댓글'}을 ${action === 'like' ? '추천' : '비추천'} 하셨습니다.`);
+    })
+    .catch(err => {
+        console.error(err);
+        alert('서버 요청 중 오류가 발생했습니다.');
     });
+});
+
 
     // === 9. 답변 토글 및 채택 기능 ===
     // 답변 토글 버튼
-    document.querySelectorAll('.answer-toggle .answer-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const post = btn.closest('.post');
-            const answers = post ? post.querySelector('.answers') : null;
-            if (answers) answers.classList.toggle('show');
-        });
-    });
+    document.addEventListener('click', e => {
+	    const btn = e.target.closest('.answer-toggle .answer-btn');
+	    if (!btn) return;
+	
+	    const post = btn.closest('.post');
+	    const answers = post.querySelector('.answers');
+	    if (answers) answers.classList.toggle('show');
+	});
 
     // 답변 채택 버튼
     document.addEventListener('click', (e) => {
@@ -440,143 +493,209 @@ document.addEventListener("DOMContentLoaded", () => {
     // === 10. 글쓰기 버튼 이벤트 ===
     if (writeBtn) {
         writeBtn.addEventListener("click", () => {
-            window.location.href = "write.html"; // 실제 경로로 변경
+            window.location.href = contextPath + "/write"; // 실제 경로로 변경
         });
     }
 
-    // === 11. 댓글/답변/게시글 수정 및 삭제, 작성 기능 ===
-    document.addEventListener('click', function(e) {
-        const target = e.target;
+    // === 11. 게시글 삭제 + 댓글/답변 CRUD 기능 ===
+	document.addEventListener('click', function(e) {
+	    const target = e.target;
+	
+	    // ===== 1) 게시글 삭제 =====
+	    if (target.classList.contains('delete-btn') && target.dataset.type === 'post') {
+	        const boardNo = target.dataset.boardNo;
+	        if (!boardNo) return;
+	
+	        if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+	            fetch(`${contextPath}/deleteBoard`, {
+	                method: "POST",
+	                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	                body: "boardNo=" + encodeURIComponent(boardNo)
+	            })
+	            .then(res => res.text())
+	            .then(result => {
+	                switch (result.trim()) {
+	                    case "SUCCESS":
+	                        alert("게시글이 삭제되었습니다.");
+	                        location.reload();
+	                        break;
+	                    case "NOT_LOGIN":
+	                        alert("로그인이 필요합니다.");
+	                        break;
+	                    case "NO_PERMISSION":
+	                        alert("삭제 권한이 없습니다.");
+	                        break;
+	                    default:
+	                        alert("삭제 중 오류가 발생했습니다.");
+	                }
+	            })
+	            .catch(() => alert("서버 요청 중 문제가 발생했습니다."));
+	        }
+	        return;
+	    }
+	
+	    // ===== 2) 댓글/답변 삭제 =====
+	    if (target.classList.contains('delete-btn') && (target.dataset.type === 'comment' || target.dataset.type === 'answer')) {
+	        const type = target.dataset.type;
+	        const item = target.closest(`.${type}-item`);
+	        if (!item) return;
+	
+	        const confirmMsg = type === 'comment' ? '이 댓글을 삭제하시겠습니까?' : '이 답변을 삭제하시겠습니까?';
+	        if (!confirm(confirmMsg)) return;
+	
+	        const id = item.dataset.id;
+	        
+	        fetch(`${contextPath}/delete`, {
+	            method: "POST",
+	            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	            body: `id=${encodeURIComponent(id)}`
+	        })
+	        .then(res => res.json())
+	        .then(data => {
+	            if(data.success) {
+	                item.remove();
+	                alert(`${type === 'comment' ? '댓글' : '답변'}이 삭제되었습니다.`);
+	            } else {
+	                alert(data.message || '삭제 실패');
+	            }
+	        })
+	        .catch(() => alert('서버 요청 중 문제가 발생했습니다.'));
+	        return;
+	    }
+	
+	    // ===== 3) 댓글/답변 수정 모드 활성화 =====
+	    if (target.classList.contains('edit-btn')) {
+	        const commentItem = target.closest('.comment-item');
+	        const answerItem = target.closest('.answer-item');
+	        const item = commentItem || answerItem;
+	        if (!item) return;
+	
+	        const isComment = !!commentItem;
+	        const post = item.closest('.post');
+	        const textElSelector = isComment ? '.c-text' : '.a-text';
+	        const formSelector = isComment ? '.comment-form' : '.answer-form';
+	        const submitBtnSelector = isComment ? '.submit-comment' : 'button[type="submit"]';
+	
+	        const textEl = item.querySelector(textElSelector);
+	        const form = post.querySelector(formSelector);
+	        const textarea = form ? form.querySelector('textarea') : null;
+	        const submitBtn = form ? form.querySelector(submitBtnSelector) : null;
+	
+	        if (textEl && textarea && submitBtn) {
+	            if (!isComment) {
+	                const answers = post.querySelector('.answers');
+	                if (answers) answers.classList.add('show');
+	            }
+	
+	            textarea.value = textEl.textContent.trim();
+	            textarea.dataset.editing = "true";
+	            textarea.dataset.targetId = item.dataset.id;
+	            textarea.dataset.editType = isComment ? "comment" : "answer";
+	            submitBtn.textContent = "수정완료";
+	            textarea.focus();
+	        }
+	        return;
+	    }
+	
+	    // ===== 4) 댓글/답변 작성 및 수정 완료 =====
+const isCommentSubmit = target.classList.contains('submit-comment');
+const isAnswerSubmit = target.type === 'submit' && target.closest('.answer-form');
+
+if (isCommentSubmit || isAnswerSubmit) {
+    e.preventDefault();
+    const form = target.closest(isCommentSubmit ? '.comment-form' : '.answer-form');
+    const textarea = form.querySelector('textarea');
+    const submitBtn = target;
+    const isEditing = textarea.dataset.editing === "true";
+    const editType = textarea.dataset.editType;
+
+    if (!textarea.value.trim()) {
+        alert(isCommentSubmit ? '댓글 내용을 입력해주세요.' : '답변 내용을 입력해주세요.');
+        textarea.focus();
+        return;
+    }
+
+    // 수정 모드
+    if (isEditing && ((isCommentSubmit && editType === "comment") || (isAnswerSubmit && editType === "answer"))) {
+        const targetId = textarea.dataset.targetId;
+        const post = form.closest('.post');
+        const targetSelector = isCommentSubmit ? `.comment-item[data-id="${targetId}"]` : `.answer-item[data-id="${targetId}"]`;
+        const textElSelector = isCommentSubmit ? '.c-text' : '.a-text';
+        const targetItem = post.querySelector(targetSelector);
+        const targetText = targetItem ? targetItem.querySelector(textElSelector) : null;
+
+        if (targetText) {
         
-        // 삭제 기능
-        if (target.classList.contains('delete-btn')) {
-            const type = target.dataset.type;
-            const item = target.closest(`.${type}-item, .post`); // 'post'의 경우 .post
-            if (!item) return;
-
-            let confirmMsg = '';
-            switch (type) {
-                case 'post': confirmMsg = '정말로 이 게시글을 삭제하시겠습니까?'; break;
-                case 'comment': confirmMsg = '이 댓글을 삭제하시겠습니까?'; break;
-                case 'answer': confirmMsg = '이 답변을 삭제하시겠습니까?'; break;
-                default: return;
-            }
-
-            if (confirm(confirmMsg)) {
-                item.remove(); // DOM에서 삭제
-                alert(`${type === 'post' ? '게시글' : type === 'comment' ? '댓글' : '답변'}이 삭제되었습니다. (실제 API 연동 필요)`);
-                // 실제 삭제 API 연동
-            }
-            return;
-        } 
-        
-        // 수정 모드 활성화 기능 (댓글/답변)
-        if (target.classList.contains('edit-btn')) {
-            const commentItem = target.closest('.comment-item');
-            const answerItem = target.closest('.answer-item');
-            let item = commentItem || answerItem;
-            if (!item) return;
-
-            const isComment = !!commentItem;
-            const post = item.closest('.post');
-            const textElSelector = isComment ? '.c-text' : '.a-text';
-            const formSelector = isComment ? '.comment-form' : '.answer-form';
-            const submitBtnSelector = isComment ? '.submit-comment' : 'button[type="submit"]';
-            
-            const textEl = item.querySelector(textElSelector);
-            const form = post.querySelector(formSelector);
-            const textarea = form ? form.querySelector('textarea') : null;
-            const submitBtn = form ? form.querySelector(submitBtnSelector) : null;
-            
-            if (textEl && textarea && submitBtn) {
-                // 답변인 경우 answers 컨테이너 펼치기
-                if (!isComment) {
-                    const answers = post.querySelector('.answers');
-                    if (answers) answers.classList.add('show');
-                }
-                
-                textarea.value = textEl.textContent.trim();
-                textarea.dataset.editing = "true";
-                textarea.dataset.targetId = item.dataset.id;
-                textarea.dataset.editType = isComment ? "comment" : "answer";
-                submitBtn.textContent = "수정완료";
-                textarea.focus();
-            }
-            return;
-        }
-
-        // 댓글/답변 작성/수정 완료 기능
-        const isCommentSubmit = target.classList.contains('submit-comment');
-        const isAnswerSubmit = target.type === 'submit' && target.closest('.answer-form');
-        
-        if (isCommentSubmit || isAnswerSubmit) {
-            e.preventDefault();
-            const form = target.closest(isCommentSubmit ? '.comment-form' : '.answer-form');
-            const textarea = form.querySelector('textarea');
-            const submitBtn = target;
-            const isEditing = textarea.dataset.editing === "true";
-            const editType = textarea.dataset.editType;
-
-            if (!textarea.value.trim()) {
-                alert(isCommentSubmit ? '댓글 내용을 입력해주세요.' : '답변 내용을 입력해주세요.');
-                textarea.focus();
-                return;
-            }
-
-            if (isEditing && ((isCommentSubmit && editType === "comment") || (isAnswerSubmit && editType === "answer"))) {
-                // 수정 완료 로직
-                const targetId = textarea.dataset.targetId;
-                const post = form.closest('.post');
-                const targetSelector = isCommentSubmit ? `.comment-item[data-id="${targetId}"]` : `.answer-item[data-id="${targetId}"]`;
-                const textElSelector = isCommentSubmit ? '.c-text' : '.a-text';
-
-                const targetItem = post.querySelector(targetSelector);
-                const targetText = targetItem ? targetItem.querySelector(textElSelector) : null;
-
-                if (targetText) {
+            fetch(`${contextPath}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${encodeURIComponent(targetId)}&content=${encodeURIComponent(textarea.value.trim())}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
                     targetText.textContent = textarea.value.trim();
-                    alert(`${isCommentSubmit ? '댓글' : '답변'}이 수정되었습니다. (실제 API 연동 필요)`);
-                    
-                    // 수정 상태 초기화
+                    alert(`${isCommentSubmit ? '댓글' : '답변'}이 수정되었습니다.`);
+
                     textarea.dataset.editing = "false";
                     textarea.dataset.targetId = "";
                     textarea.dataset.editType = "";
                     textarea.value = "";
                     submitBtn.textContent = isCommentSubmit ? "작성" : "등록";
-                    // 실제 수정 API 연동
+                } else {
+                    alert(data.message || '수정 실패');
                 }
-            } else if (!isEditing) {
-                // 신규 작성 로직
-                if (!confirm("등록하시겠습니까?")) return;
+            })
+            .catch(() => alert('서버 요청 중 문제가 발생했습니다.'));
+        }
+    } 
+    // 신규 작성 모드
+    else {
+        if (!confirm("등록하시겠습니까?")) return;
 
+        const post = form.closest('.post');
+        const postId = post.dataset.id;
+        const content = textarea.value.trim();
+
+        const api = isCommentSubmit ? `${contextPath}/addComment` : `${contextPath}/addAnswer`;
+        const bodyData = `boardNo=${encodeURIComponent(postId)}&content=${encodeURIComponent(content)}`;
+
+        fetch(api, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
                 if (isCommentSubmit) {
-                    // 댓글 작성 로직: 서버 연동 후 DOM에 추가 (여기서는 간단히 alert와 초기화만)
-                    alert("댓글을 작성하였습니다. (실제 API 연동 필요)");
-                    textarea.value = "";
-                    // 실제 작성 API 연동 및 댓글 목록 갱신
-                } else if (isAnswerSubmit) {
-                    // 답변 작성 로직: (임시로 DOM에 직접 추가)
-                    const answersContainer = form.closest('.answers');
-                    const answerList = answersContainer ? answersContainer.querySelector('.answer-list') : null;
-                    if (!answerList) return;
-
-                    // 새로운 ID 생성 (임시)
-                    const existingAnswers = answerList.querySelectorAll('.answer-item');
-                    let maxId = 0;
-                    existingAnswers.forEach(answer => {
-                        const id = parseInt(answer.dataset.id);
-                        if (id > maxId) maxId = id;
-                    });
-                    const newId = maxId + 1;
-
-                    // 새 답변 항목 생성
+                    // 댓글 DOM 추가
+                    const commentList = post.querySelector('.comments');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'comment-item';
+                    newItem.dataset.id = data.id;
+                    newItem.innerHTML = `
+                        <span class="c-text">${escapeHtml(content)}</span>
+					    <div class="c-votes">
+					        <span class="comment-up" data-id="${data.id}">0 👍</span>
+					        <span class="comment-down" data-id="${data.id}">0 👎</span>
+					    </div>
+					    <div class="comment-actions">
+					        <span class="edit-btn">수정</span>
+					        <span class="delete-btn" data-type="comment">삭제</span>
+					    </div>
+                    `;
+                    commentList.appendChild(newItem);
+                } else {
+                    // 답변 DOM 추가
+                    const answerList = post.querySelector('.answers .answer-list');
                     const newItem = document.createElement('div');
                     newItem.className = 'answer-item';
-                    newItem.dataset.id = newId;
+                    newItem.dataset.id = data.id;
                     newItem.innerHTML = `
-                        <div class="a-text">${escapeHtml(textarea.value.trim())}</div>
+                        <div class="a-text">${escapeHtml(content)}</div>
                         <div class="a-footer">
-                            <span class="author">by 나</span>
+                            <span class="author">by ${data.author}</span>
                             <div class="answer-actions">
                                 <span class="edit-btn">수정</span>
                                 <span class="delete-btn" data-type="answer">삭제</span>
@@ -585,14 +704,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `;
                     answerList.appendChild(newItem);
-
-                    textarea.value = '';
-                    answersContainer.classList.add('show'); // 답변 목록 표시
-                    alert('답변이 작성되었습니다. (실제 API 연동 필요)');
+                    post.querySelector('.answers').classList.add('show');
                 }
+
+                textarea.value = '';
+                alert(`${isCommentSubmit ? '댓글' : '답변'}이 작성되었습니다.`);
+            } else {
+                alert(data.message || '작성 실패');
             }
-        }
-    });
+        })
+        .catch(() => alert('서버 요청 중 문제가 발생했습니다.'));
+    }
+}
+	});
     
     // === 12. 공지사항 실시간 갱신 (jQuery 사용) ===
     if (window.jQuery) {
@@ -614,4 +738,112 @@ document.addEventListener("DOMContentLoaded", () => {
         updateNotice(); // 페이지 로드 시 즉시 갱신
         setInterval(updateNotice, 10000); // 10초마다 갱신
     }
+    
+	// === 13. 카테고리별 게시글 필터링 (개선, 텍스트 매핑 유지) ===
+	const postContainer = document.getElementById("postContainer");
+	const feedButtonsFragment = document.querySelectorAll(".feed-buttons button");
+	
+	// --- 이벤트 위임: 게시글 내 "더보기" 버튼 및 닉네임 드롭다운 ---
+	postContainer.addEventListener("click", (e) => {
+	    // 1) "더보기" 버튼
+	    const moreBtn = e.target.closest(".more");
+	    if (moreBtn) {
+	        const post = moreBtn.closest(".post");
+	        if (!post) return;
+	
+	        const body = post.querySelector(".bnote");
+	        const imageBox = post.querySelector(".post-images");
+	        const comments = post.querySelector(".comments");
+	        const commentForm = post.querySelector(".comment-form");
+	
+	        if (!body) return;
+	
+	        if (!body.dataset.fullText) body.dataset.fullText = body.textContent.trim();
+	        const fullText = body.dataset.fullText;
+	
+	        const isExpanded = moreBtn.classList.toggle("expanded");
+	        body.textContent = isExpanded ? fullText : (fullText.length > 100 ? fullText.substring(0, 100) + "..." : fullText);
+	
+	        if (imageBox) imageBox.style.display = isExpanded ? "flex" : "none";
+	        if (comments && commentForm) {
+	            comments.style.display = isExpanded ? "block" : "none";
+	            commentForm.style.display = isExpanded ? "flex" : "none";
+	        }
+	
+	        moreBtn.textContent = isExpanded ? "접기" : "더보기";
+	        return;
+	    }
+	
+	    // 2) 닉네임 드롭다운
+	    const dropdown = e.target.closest(".nick.dropdown");
+	    if (dropdown) {
+	        e.stopPropagation();
+	        dropdown.classList.toggle("open");
+	    }
+	});
+	
+	
+	topButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+        	const sortMap = {
+	            "최신순": "latest",
+	            "조회순": "hit",
+	            "추천순": "like"
+	        };
+	        
+	        const sortText = btn.textContent.trim();
+	        sort = sortMap[sortText] || "latest";
+	        
+	        topButtons.forEach(b => b.classList.remove("active"));
+        	btn.classList.add("active");
+	        
+	        fetch(`${contextPath}/home/posts?category=${category}&sort=${sort}`)
+	            .then(res => {
+	                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+	                return res.text();
+	            })
+	            .then(html => {
+	                postContainer.innerHTML = html;
+	                // 새로 로드된 게시글 dataset 초기화
+	                postContainer.querySelectorAll(".bnote").forEach(b => b.dataset.fullText = b.textContent.trim());
+	            })
+	            .catch(err => alert("게시글 로드 실패: " + err.message));
+        });
+    });
+	
+	// --- feed 버튼 클릭 시 AJAX 호출 (기존 텍스트 기반 매핑 유지) ---
+	feedButtonsFragment.forEach(btn => {
+	    btn.addEventListener("click", () => {
+	        const categoryMap = {
+	            "전체": 0,
+	            "자유": 1,
+	            "코딩테스트": 3,
+	            "Q&A": 2
+	        };
+	        const categoryText = btn.textContent.trim();
+	        category = categoryMap[categoryText] || 0;
+	
+	        // 버튼 활성화
+	        feedButtonsFragment.forEach(b => b.classList.remove("active"));
+	        btn.classList.add("active");
+	
+	        fetch(`${contextPath}/home/posts?category=${category}&sort=${sort}`)
+	            .then(res => {
+	                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+	                return res.text();
+	            })
+	            .then(html => {
+	                postContainer.innerHTML = html;
+	                // 새로 로드된 게시글 dataset 초기화
+	                postContainer.querySelectorAll(".bnote").forEach(b => b.dataset.fullText = b.textContent.trim());
+	            })
+	            .catch(err => alert("게시글 로드 실패: " + err.message));
+	    });
+	});
+	
+	// --- 외부 클릭 시 모든 드롭다운 닫기 ---
+	document.addEventListener("click", () => {
+	    postContainer.querySelectorAll(".nick.dropdown.open")
+	        .forEach(d => d.classList.remove("open"));
+	});
 });

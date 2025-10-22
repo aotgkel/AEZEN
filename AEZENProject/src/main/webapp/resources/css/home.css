@@ -313,11 +313,11 @@ header {
     gap: 10px;
 }
 .post-header .kind {
-    flex: 0.5;
+    flex: 0.7;
     font-size: 14px;
 }
 .post-header .title {
-    flex: 2;
+    flex: 1.8;
     font-size: 12px;
     font-weight: bold;
 }
@@ -344,7 +344,7 @@ header {
 }
 .post-header .nick {
     flex: 0.8;
-    font-size: 14px;
+    font-size: 12px;
     text-align: right;
 }
 

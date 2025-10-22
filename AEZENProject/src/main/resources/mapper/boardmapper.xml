@@ -7,7 +7,8 @@
 
 	<resultMap type="com.aezen.www.vo.BoardVO" id="board">
 		<id property="boardNo" column="board_no" />
-		<result property="id" column="nick"/>
+		<result property="id" column="id"/>
+		<result property="nick" column="nick"/>
 		<result property="boardTitle" column="board_title"/>
 		<result property="boardContent" column="board_content" />
 	    <result property="boardCategory" column="board_category" />
@@ -38,8 +39,22 @@
 		    <result property="boardNo" column="board_no" />
 	    </collection>
 	    <collection property="tags" ofType="com.aezen.www.vo.TagVO">
-	    	<result property="tagName" column="tag_name"/>
+	    	<id property="tagNo" column="tag_no"/>
+    		<result property="tagName" column="tag_name"/>
 	    </collection>
+	</resultMap>
+	<resultMap type="com.aezen.www.vo.FileVO" id="file">
+		<id property="fileNo" column="file_no"/>
+		<result property="logicalFileName" column="logical_file_name"/>
+		<result property="physicalFileName" column="physical_file_name"/>
+		<result property="fileSize" column="file_size"/>
+		<result property="fileExt" column="file_ext"/>
+		<result property="boardNo" column="board_no"/>
+	</resultMap>
+	<resultMap type="com.aezen.www.vo.TagVO" id="tagVO">
+		<id property="tagNo" column="tag_no"/>
+   		<result property="tagName" column="tag_name"/>
+   		<result property="createdAt" column="created_at"/>
 	</resultMap>
 
 	<!-- 공지사항 최신글 제목만 보여주기 -->
@@ -57,6 +72,7 @@
 			board.*,
 			comment_answer.*,
 			user.nick as nick,
+			user.id as id,
 			comment_user.nick as commenter_nick,
 			file.*,
 			tag.tag_name
@@ -68,6 +84,140 @@
 		left join comment_answer on board.board_no = comment_answer.board_no
 		left join user comment_user on comment_answer.id = comment_user.id
 		WHERE board.board_deleted = 0
+		order by board.board_no desc
 	</select>
+	
+	<!-- 게시글 저장 -->
+	<insert id="insertBoard" parameterType="com.aezen.www.vo.BoardVO" useGeneratedKeys="true" keyProperty="boardNo">
+	    INSERT INTO board (id, board_title, board_content, board_category, board_created_at, board_updated_at)
+	    VALUES (#{id}, #{boardTitle}, #{boardContent}, #{boardCategory}, NOW(), NOW())
+	</insert>
+	
+	<!-- 파일 저장 -->
+	<insert id="insertFile" parameterType="com.aezen.www.vo.FileVO">
+	    INSERT INTO file (logical_file_name, physical_file_name, file_size, file_ext, board_no)
+	    VALUES (#{logicalFileName}, #{physicalFileName}, #{fileSize}, #{fileExt}, #{boardNo})
+	</insert>
+	
+	<!-- 파일 다운 -->
+	<select id="selectFileByNo" parameterType="int" resultMap="file">
+	    SELECT * FROM file WHERE file_no = #{fileNo}
+	</select>
+	
+	<!-- 태그 이름으로 조회 -->
+	<select id="selectTagByName" parameterType="string" resultMap="tagVO">
+	    SELECT * FROM tag WHERE tag_name = #{tagName}
+	</select>
+	
+	<!-- 태그 저장 -->
+	<insert id="insertTag" parameterType="com.aezen.www.vo.TagVO" useGeneratedKeys="true" keyProperty="tagNo">
+	    INSERT INTO tag(tag_name, created_at)
+	    VALUES(#{tagName}, NOW())
+	    ON DUPLICATE KEY UPDATE tag_name=tag_name;
+	</insert>
+	
+	<!-- 게시글-태그 연결 저장 -->
+	<insert id="insertTagBoard" parameterType="com.aezen.www.vo.TagBoardVO">
+	    INSERT INTO tag_board(board_no, tag_no)
+	    VALUES(#{boardNo}, #{tagNo})
+	</insert>
+	
+	<!-- 특정 게시글 조회 (수정/보기용) -->
+	<select id="selectBoardByNo" resultMap="board" parameterType="int">
+	    SELECT
+	        board.*,
+	        comment_answer.*,
+	        user.nick as nick,
+	        comment_user.nick as commenter_nick,
+	        file.*,
+	        tag.tag_name
+	    FROM board
+	    LEFT JOIN user ON board.id = user.id
+	    LEFT JOIN file ON board.board_no = file.board_no
+	    LEFT JOIN tag_board ON tag_board.board_no = board.board_no
+	    LEFT JOIN tag ON tag.tag_no = tag_board.tag_no
+	    LEFT JOIN comment_answer ON board.board_no = comment_answer.board_no
+	    LEFT JOIN user comment_user ON comment_answer.id = comment_user.id
+	    WHERE board.board_deleted = 0
+	      AND board.board_no = #{boardNo}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="updateBoard" parameterType="com.aezen.www.vo.BoardVO">
+	    UPDATE board
+	    SET
+	        board_title = #{boardTitle},
+	        board_content = #{boardContent},
+	        board_category = #{boardCategory},
+	        board_updated_at = NOW()
+	    WHERE board_no = #{boardNo}
+	</update>
+	
+	<!-- 태그  -->
+	<select id="countTagBoard" parameterType="map" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM tag_board 
+	    WHERE board_no = #{boardNo} AND tag_no = #{tagNo}
+	</select>
+	
+	<!-- 게시글 삭제 -->
+	<update id="deleteBoard" parameterType="int">
+	    UPDATE board
+	    SET board_deleted = 1
+	    WHERE board_no = #{boardNo}
+	</update>
+	
+	<update id="incrementLike">
+	    UPDATE board
+	    SET board_like = board_like + 1
+	    WHERE board_no = #{boardNo}
+	</update>
+	
+	<update id="incrementDislike">
+	    UPDATE board
+	    SET board_dislike = board_dislike + 1
+	    WHERE board_no = #{boardNo}
+	</update>
+	
+	<select id="selectLikeCount" resultType="int">
+	    SELECT board_like FROM board WHERE board_no = #{boardNo}
+	</select>
+	
+	<select id="selectDislikeCount" resultType="int">
+	    SELECT board_dislike FROM board WHERE board_no = #{boardNo}
+	</select>
+	
+	<select id="selectBoardByCategory" parameterType="int" resultMap="board">
+	    select
+	        board.*,
+	        comment_answer.*,
+	        user.nick as nick,
+	        comment_user.nick as commenter_nick,
+	        file.*,
+	        tag.tag_name
+	    from board
+	    left join user on board.id = user.id
+	    left join file on board.board_no = file.board_no
+	    left join tag_board on tag_board.board_no = board.board_no
+	    left join tag on tag.tag_no = tag_board.tag_no
+	    left join comment_answer on board.board_no = comment_answer.board_no
+	    left join user comment_user on comment_answer.id = comment_user.id
+	    where board.board_deleted = 0
+	      <if test="category != 0">
+	        and board.board_category = #{category}
+	      </if>
+	    <choose>
+	        <when test="sort == 'hit'">
+	            ORDER BY board.hit DESC
+	        </when>
+	        <when test="sort == 'like'">
+	            ORDER BY board.board_like DESC
+	        </when>
+	        <otherwise>
+	            ORDER BY board.board_no DESC
+	        </otherwise>
+	    </choose>
+	</select>
+	
 
 </mapper>

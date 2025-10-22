@@ -14,7 +14,7 @@ public class CommentAnswerVO {
     private int commentDislikeCount; // 싫어요 수
     private String commentAnswerAt; // 작성일시
     private String commentAnswerUpdatedAt; // 수정일시
-    private int commentAnswerType; // 타입 (0: 댓글, 1: 답변)
+    private int commentAnswerType; // 타입 (1: 댓글, 2: 답변)
     private boolean answerAccepted; // 답변 채택 여부 (boolean 타입)
 
     // =============================

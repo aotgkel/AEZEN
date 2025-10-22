@@ -10,60 +10,42 @@ public class FileVO {
     private long fileSize; // 파일 크기 (바이트)
     private String fileExt; // 파일 확장자
     private int boardNo; // 파일이 연결된 게시글 번호 (Foreign Key)
+	public int getFileNo() {
+		return fileNo;
+	}
+	public void setFileNo(int fileNo) {
+		this.fileNo = fileNo;
+	}
+	public String getLogicalFileName() {
+		return logicalFileName;
+	}
+	public void setLogicalFileName(String logicalFileName) {
+		this.logicalFileName = logicalFileName;
+	}
+	public String getPhysicalFileName() {
+		return physicalFileName;
+	}
+	public void setPhysicalFileName(String physicalFileName) {
+		this.physicalFileName = physicalFileName;
+	}
+	public long getFileSize() {
+		return fileSize;
+	}
+	public void setFileSize(long fileSize) {
+		this.fileSize = fileSize;
+	}
+	public String getFileExt() {
+		return fileExt;
+	}
+	public void setFileExt(String fileExt) {
+		this.fileExt = fileExt;
+	}
+	public int getBoardNo() {
+		return boardNo;
+	}
+	public void setBoardNo(int boardNo) {
+		this.boardNo = boardNo;
+	}
 
-    // =============================
-    // Getters
-    // =============================
-
-    public int getFileNo() {
-        return fileNo;
-    }
-
-    public String getLogicalFileName() {
-        return logicalFileName;
-    }
-
-    public String getPhysicalFileName() {
-        return physicalFileName;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public String getFileExt() {
-        return fileExt;
-    }
-
-    public int getBoardNo() {
-        return boardNo;
-    }
-
-    // =============================
-    // Setters
-    // =============================
-
-    public void setFileNo(int fileNo) {
-        this.fileNo = fileNo;
-    }
-
-    public void setLogicalFileName(String logicalFileName) {
-        this.logicalFileName = logicalFileName;
-    }
-
-    public void setPhysicalFileName(String physicalFileName) {
-        this.physicalFileName = physicalFileName;
-    }
-
-    public void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public void setFileExt(String fileExt) {
-        this.fileExt = fileExt;
-    }
-
-    public void setBoardNo(int boardNo) {
-        this.boardNo = boardNo;
-    }
+    
 }

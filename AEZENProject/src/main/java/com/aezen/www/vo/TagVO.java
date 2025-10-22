@@ -6,15 +6,15 @@ import java.time.LocalDateTime;
  * 클래스 기능 : 태그 정보 (tag 테이블)
  */
 public class TagVO {
-    private int tagNo; // 태그 번호 (Primary Key)
+    private Integer tagNo; // 태그 번호 (Primary Key)
     private String tagName; // 태그 이름 (Unique)
-    private LocalDateTime createdAt; // 생성 일시
+    private String createdAt; // 생성 일시
 
     // =============================
     // Getters
     // =============================
 
-    public int getTagNo() {
+    public Integer getTagNo() {
         return tagNo;
     }
 
@@ -22,7 +22,7 @@ public class TagVO {
         return tagName;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
@@ -30,7 +30,7 @@ public class TagVO {
     // Setters
     // =============================
 
-    public void setTagNo(int tagNo) {
+    public void setTagNo(Integer tagNo) {
         this.tagNo = tagNo;
     }
 
@@ -38,7 +38,7 @@ public class TagVO {
         this.tagName = tagName;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 }

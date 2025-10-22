@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
+<mapper namespace="com.aezen.www.commentAnswer">
+
+    <resultMap id="commentAnswerMap" type="com.aezen.www.vo.CommentAnswerVO">
+        <id property="commentAnswerNo" column="comment_answer_no"/>
+        <result property="boardNo" column="board_no"/>
+        <result property="id" column="id"/>
+        <result property="commentAnswerContent" column="comment_answer_content"/>
+        <result property="commentAnswerType" column="comment_answer_type"/>
+        <result property="commentAnswerAt" column="comment_answer_at"/>
+        <result property="commentAnswerUpdatedAt" column="comment_answer_updated_at"/>
+        <result property="commentLikeCount" column="comment_like_count"/>
+        <result property="commentDislikeCount" column="comment_dislike_count"/>
+        <result property="answerAccepted" column="answer_accepted"/>
+    </resultMap>
+
+	<resultMap type="com.aezen.www.vo.BoardVO" id="board">
+		<id property="boardNo" column="board_no" />
+		<result property="id" column="id"/>
+		<result property="nick" column="nick"/>
+		<result property="boardTitle" column="board_title"/>
+		<result property="boardContent" column="board_content" />
+	    <result property="boardCategory" column="board_category" />
+	    <result property="hit" column="hit" />
+	    <result property="boardLike" column="board_like" />
+	    <result property="boardDislike" column="board_dislike" />
+	    <result property="boardCreatedAt" column="board_created_at" />
+	    <result property="boardUpdatedAt" column="board_updated_at" />
+	    <result property="board_deleted" column="board_deleted" /> 
+	    <collection property="comments" ofType="com.aezen.www.vo.CommentAnswerVO">
+	        <id property="commentAnswerNo" column="comment_answer_no" />
+		    <result property="boardNo" column="board_no" />
+		    <result property="id" column="id" />
+		    <result property="commentAnswerContent" column="comment_answer_content" />
+		    <result property="commentLikeCount" column="comment_like_count" />
+		    <result property="commentDislikeCount" column="comment_dislike_count" />
+		    <result property="commentAnswerAt" column="comment_answer_at" />
+		    <result property="commentAnswerUpdatedAt" column="comment_answer_updated_at" />
+		    <result property="commentAnswerType" column="comment_answer_type" />
+		    <result property="answerAccepted" column="answer_accepted" />
+	    </collection>
+	    <collection property="files" ofType="com.aezen.www.vo.FileVO">
+	    	<id property="fileNo" column="file_no" />
+		    <result property="logicalFileName" column="logical_file_name" />
+		    <result property="physicalFileName" column="physical_file_name" />
+		    <result property="fileSize" column="file_size" />
+		    <result property="fileExt" column="file_ext" />
+		    <result property="boardNo" column="board_no" />
+	    </collection>
+	    <collection property="tags" ofType="com.aezen.www.vo.TagVO">
+	    	<id property="tagNo" column="tag_no"/>
+    		<result property="tagName" column="tag_name"/>
+	    </collection>
+	</resultMap>
+	<resultMap type="com.aezen.www.vo.FileVO" id="file">
+		<id property="fileNo" column="file_no"/>
+		<result property="logicalFileName" column="logical_file_name"/>
+		<result property="physicalFileName" column="physical_file_name"/>
+		<result property="fileSize" column="file_size"/>
+		<result property="fileExt" column="file_ext"/>
+		<result property="boardNo" column="board_no"/>
+	</resultMap>
+	<resultMap type="com.aezen.www.vo.TagVO" id="tagVO">
+		<id property="tagNo" column="tag_no"/>
+   		<result property="tagName" column="tag_name"/>
+   		<result property="createdAt" column="created_at"/>
+	</resultMap>
+
+	<!-- 댓글 저장 -->
+    <insert id="insertComment" parameterType="com.aezen.www.vo.CommentAnswerVO" useGeneratedKeys="true" keyProperty="commentAnswerNo">
+        INSERT INTO comment_answer (board_no, id, comment_answer_content, comment_answer_type, comment_answer_at)
+        VALUES (#{boardNo}, #{id}, #{commentAnswerContent}, 1, NOW())
+    </insert>
+
+    <!-- 답변 저장 -->
+    <insert id="insertAnswer" parameterType="com.aezen.www.vo.CommentAnswerVO" useGeneratedKeys="true" keyProperty="commentAnswerNo">
+        INSERT INTO comment_answer (board_no, id, comment_answer_content, comment_answer_type, comment_answer_at)
+        VALUES (#{boardNo}, #{id}, #{commentAnswerContent}, 2, NOW())
+    </insert>
+
+    <!-- 단일 조회 -->
+    <select id="selectById" parameterType="int" resultMap="commentAnswerMap">
+        SELECT * FROM comment_answer WHERE comment_answer_no = #{id}
+    </select>
+
+    <!-- 수정 -->
+    <update id="update" parameterType="com.aezen.www.vo.CommentAnswerVO">
+        UPDATE comment_answer
+        SET comment_answer_content = #{commentAnswerContent}, comment_answer_updated_at = NOW()
+        WHERE comment_answer_no = #{commentAnswerNo}
+    </update>
+
+    <!-- 삭제 (즉시 삭제) -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM comment_answer WHERE comment_answer_no = #{id}
+    </delete>
+    
+    <update id="incrementLike">
+	    UPDATE comment_answer
+	    SET comment_like_count = comment_like_count + 1
+	    WHERE comment_answer_no = #{commentNo}
+	</update>
+	
+	<update id="incrementDislike">
+	    UPDATE comment_answer
+	    SET comment_dislike_count = comment_dislike_count + 1
+	    WHERE comment_answer_no = #{commentNo}
+	</update>
+	
+	<select id="selectLikeCount" resultType="int">
+	    SELECT comment_like_count FROM comment_answer WHERE comment_answer_no = #{commentNo}
+	</select>
+	
+	<select id="selectDislikeCount" resultType="int">
+	    SELECT comment_dislike_count FROM comment_answer WHERE comment_answer_no = #{commentNo}
+	</select>
+	
+
+</mapper>
