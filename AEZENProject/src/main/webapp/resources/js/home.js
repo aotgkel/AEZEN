@@ -846,4 +846,114 @@ if (isCommentSubmit || isAnswerSubmit) {
 	    postContainer.querySelectorAll(".nick.dropdown.open")
 	        .forEach(d => d.classList.remove("open"));
 	});
+	
+	// ===== 14. 실시간 채팅 =====
+	const chatPanel = document.getElementById("panel-chat");
+	const messages = chatPanel.querySelector(".messages");
+	const chatInput = chatPanel.querySelector(".chat-input input");
+	const sendBtn = chatPanel.querySelector(".chat-input button");
+	
+	const loc = window.location;
+	const wsProtocol = loc.protocol === "https:" ? "wss:" : "ws:";
+	const wsUrl = `${wsProtocol}//${loc.host}${contextPath}/ws-chat`;
+	
+	let socket; // 전역 WebSocket 객체
+	
+	// ===== 초기 접속자 수 가져오기 =====
+fetch(`${contextPath}/userCount`)
+  .then(res => res.json())
+  .then(data => {
+      const userCountEl = document.getElementById("user-count");
+      if (userCountEl && data.userCount !== undefined) {
+          userCountEl.textContent = data.userCount;
+      }
+  })
+  .catch(err => console.error('초기 접속자 수 가져오기 실패:', err));
+	
+	// ===== WebSocket 연결 함수 =====
+	function connectWebSocket() {
+	
+	    socket = new WebSocket(wsUrl);
+	
+	    socket.onopen = () => {
+	     console.log("웹소켓 연결됨");
+	    };
+	
+	    socket.onmessage = (event) => {
+	    console.log("서버 메시지 수신:", event.data); // 🔥 여기 추가
+	        try {
+	            const data = JSON.parse(event.data);
+	            console.log("파싱 후 객체:", data);
+	            
+	            
+
+				if (Object.prototype.hasOwnProperty.call(data, "userCount")) {
+		            console.log("실시간 접속자 수 수신:", data.userCount);
+		            const userCountEl = document.getElementById("user-count");
+		            if (userCountEl) {
+		                userCountEl.textContent = data.userCount;
+		            }
+		            return; // 여기서 종료 (채팅 메시지 아님)
+		        }
+	            
+	            // 2) 일반 채팅 메시지 처리
+      		    if (data.id && data.chatContent && data.chatCreatedAt) {
+	            const div = document.createElement("div");
+	            div.classList.add("chat-message");
+	            div.innerHTML = `
+	                <strong>${data.id}</strong>: ${data.chatContent}
+	                <span class="timestamp">${new Date(data.chatCreatedAt).toLocaleTimeString()}</span>
+	            `;
+	            messages.appendChild(div);
+	            messages.scrollTop = messages.scrollHeight; }
+	        } catch (err) {
+	            console.error("메시지 처리 오류:", err);
+	            console.error("원본 데이터:", event.data);
+	        }
+	    };
+	
+	    socket.onclose = () => {
+	        setTimeout(connectWebSocket, 1000); // 자동 재연결
+	    };
+	
+	    socket.onerror = (err) => {
+	        console.error("웹소켓 오류:", err);
+	    };
+	}
+	
+	// ===== 메시지 전송 =====
+	function sendMessage() {
+	    const content = chatInput.value.trim();
+	    if (!content) return;
+	    
+	if (socket.readyState === WebSocket.OPEN) { 
+	    const chat = {
+	        chatContent: content,
+	        chatCreatedAt: new Date().toISOString()
+	    };
+		socket.send(JSON.stringify(chat));
+		
+		// 입력창 초기화
+        chatInput.value = "";
+        chatInput.focus(); // 선택 상태 유지
+        } else {
+        console.warn("웹소켓이 연결되지 않았습니다. 메시지를 전송할 수 없습니다.");
+    }
+	}
+	
+	// ===== 이벤트 등록 =====
+	sendBtn.addEventListener("click", sendMessage);
+	chatInput.addEventListener("keydown", (e) => {
+	    if (e.key === "Enter") sendMessage();
+	});
+	
+	// ===== 초기 연결 =====
+	connectWebSocket();
+	
+	// ===== 페이지 종료 시 WebSocket 닫기 =====
+	window.addEventListener("beforeunload", () => {
+	    if (socket) socket.close();
+	});
+	
+	
 });

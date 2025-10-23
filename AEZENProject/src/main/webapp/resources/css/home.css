@@ -826,6 +826,15 @@ header {
     padding: 8px;
     margin: 8px 0;
 }
+.tab-panel .chat-message {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+.tab-panel .timestamp {
+    font-size: 0.8rem;
+    color: gray;
+    margin-left: 5px;
+}
 /* 채팅 입력창 */
 .tab-panel .chat-input {
     display: flex;

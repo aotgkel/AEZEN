@@ -13,42 +13,45 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
 
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://192.168.0.180/aezen?serverTimezone=Asia/Seoul&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
+	<context:component-scan
+		base-package="com.aezen.www" />
+	<mvc:annotation-driven />
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.cj.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://192.168.0.180/aezen?serverTimezone=Asia/Seoul&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
 		<property name="username" value="jwh" />
 		<property name="password" value="ezen" />
 	</bean>
-	
-	<!-- 
-		DriverManagerDataSource dataSource = new DriverManagerDataSource() 
-		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver")
-		dataSource.setUrl("jdbc....")
-		dataSource.setUserName("root")
-		dataSource.setPassword("ezen")
-	-->
 
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<!-- DriverManagerDataSource dataSource = new DriverManagerDataSource() 
+		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver") dataSource.setUrl("jdbc....") 
+		dataSource.setUserName("root") dataSource.setPassword("ezen") -->
+
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="mapperLocations" value="classpath*:mapper/**/*.xml" />
+		<property name="mapperLocations"
+			value="classpath*:mapper/**/*.xml" />
 	</bean>
-	
-	<!--
-		SqlSessionFactoryBean sqlSessionFactory = SqlSessionFactoryBean();
-		sqlSessionFactory.setDataSource(dataSource);
-		sqlSessionFactory.setMapperLocations("classpath*:mapper/**/*.xml")
-	-->
 
-	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate"
+	<!-- SqlSessionFactoryBean sqlSessionFactory = SqlSessionFactoryBean(); 
+		sqlSessionFactory.setDataSource(dataSource); sqlSessionFactory.setMapperLocations("classpath*:mapper/**/*.xml") -->
+
+	<bean id="sqlSession"
+		class="org.mybatis.spring.SqlSessionTemplate"
 		destroy-method="clearCache">
-		<constructor-arg ref="sqlSessionFactory" name="sqlSessionFactory" />
+		<constructor-arg ref="sqlSessionFactory"
+			name="sqlSessionFactory" />
 	</bean>
-	
-	<!-- 
-		SqlSessionTemplate sqlSession = new SqlSessionTemplate(sqlSessionFactory);
-	-->
-	
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+
+	<!-- SqlSessionTemplate sqlSession = new SqlSessionTemplate(sqlSessionFactory); -->
+
+	<bean id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.naver.com" />
 		<property name="port" value="465" />
 		<property name="username" value="jjibask" />
@@ -64,5 +67,9 @@
 				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
 			</props>
 		</property>
-	</bean>	
+	</bean>
+	<bean id="jdbcTemplate"
+		class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 </beans>

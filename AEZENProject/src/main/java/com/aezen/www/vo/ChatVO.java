@@ -9,7 +9,7 @@ public class ChatVO {
     private int chatNo; // 채팅 메시지 번호 (Primary Key)
     private String id; // 발신자 ID
     private String chatContent; // 채팅 내용
-    private LocalDateTime chatCreatedAt; // 전송 일시
+    private String chatCreatedAt; // 전송 일시
 
     // =============================
     // Getters
@@ -27,7 +27,7 @@ public class ChatVO {
         return chatContent;
     }
 
-    public LocalDateTime getChatCreatedAt() {
+    public String getChatCreatedAt() {
         return chatCreatedAt;
     }
 
@@ -47,7 +47,7 @@ public class ChatVO {
         this.chatContent = chatContent;
     }
 
-    public void setChatCreatedAt(LocalDateTime chatCreatedAt) {
+    public void setChatCreatedAt(String chatCreatedAt) {
         this.chatCreatedAt = chatCreatedAt;
     }
 }

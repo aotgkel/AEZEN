@@ -91,19 +91,18 @@
 
 				<!-- 탭 패널: 실시간채팅 -->
 				<div class="tab-panel" id="panel-chat" role="tabpanel">
-					<div style="text-align: center;">현재 접속자 수</div>
-					<div style="text-align: center;">100,543명</div>
-					<!-- 채팅로그 -->
-					<div class="messages">
-						안녕하세요... (닉네임) 🔔
-						<div style="margin-top: 6px; color: #666; font-size: 12px;">(예시
-							채팅이 표시됩니다.)</div>
-					</div>
+					<div style="text-align: center;">현재 접속자 수: <span id="user-count">0</span>명</div>
+					
+					<!-- 채팅로그 --> 
+					<div class="messages" id="chatMessages" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:5px;">
+				        <!-- 메시지가 JS로 추가됩니다 -->
+				    </div>
+				    
 					<!-- 입력창 (하단 고정) -->
 					<div class="chat-input">
-						<input type="text" placeholder="내용을 입력하세요">
-						<button>전송</button>
-					</div>
+				        <input type="text" id="chatInput" placeholder="내용을 입력하세요">
+				        <button id="sendBtn">전송</button>
+				    </div>
 				</div>
 
 				<!-- 탭 패널: 마이페이지 -->
