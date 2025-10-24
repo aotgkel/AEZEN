@@ -2,6 +2,7 @@ package com.aezen.www.repository;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -104,5 +105,16 @@ public class BoardRepository {
         return session.selectList(namespace + ".selectBoardByCategory",
                                   Map.of("category", category, "sort", sort));
     }
+    
+    public List<BoardVO> selectBoardByCategory(int category, String sort, String id) {
+    	
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	map.put("category", category);
+    	map.put("sort", sort);
+    	map.put("id", id);
+    	
+        return session.selectList(namespace + ".selectBoardByCategory",map);
+    }
+    
     
 }

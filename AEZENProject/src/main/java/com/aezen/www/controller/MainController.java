@@ -44,7 +44,7 @@ public class MainController {
 	@Autowired
 	private BoardRepository boardRepository;
 
-	// 공지사항 제목, 게시글 상세정보 불러오기
+	// 怨듭��ы�� ��紐�, 寃���湲� ���몄��蹂� 遺��ъ�ㅺ린
 	@RequestMapping("/home")
 	public String home(Model model) {
 		String latestNoticeTitle = boardRepository.selectLatestNoticeTitle();
@@ -55,40 +55,40 @@ public class MainController {
 		return "main/home";
 	}
 
-	// 실시간 공지 API
+	// �ㅼ��媛� 怨듭� API
 	@GetMapping(value = "/latestNotice", produces = "text/plain; charset=UTF-8")
 	@ResponseBody
 	public String latestNotice() {
 		return boardRepository.selectLatestNoticeTitle();
 	}
 
-	// 글쓰기 페이지(GET) – 로그인 체크
+	// 湲��곌린 ���댁�(GET) �� 濡�洹몄�� 泥댄��
 	@RequestMapping(value = "/write", method = RequestMethod.GET)
 	public String writeForm(HttpServletRequest request,
 			@RequestParam(value = "board_no", required = false) Integer boardNo, Model model) {
 
 		UserVO login = (UserVO) request.getSession().getAttribute("login");
 		if (login == null) {
-			return "redirect:/home"; // 비로그인 시 홈으로
+			return "redirect:/home"; // 鍮�濡�洹몄�� �� ���쇰�
 		}
 
 		if (boardNo != null) {
-			// 수정 모드: 게시글 불러오기
+			// ���� 紐⑤��: 寃���湲� 遺��ъ�ㅺ린
 			BoardVO post = boardRepository.selectBoardByNo(boardNo);
 
-			// 작성자가 로그인한 사용자와 같은지 체크
+			// ���깆��媛� 濡�洹몄�명�� �ъ�⑹���� 媛���吏� 泥댄��
 			if (!login.getId().equals(post.getId())) {
-				return "redirect:/home"; // 권한 없으면 홈으로
+				return "redirect:/home"; // 沅��� ���쇰㈃ ���쇰�
 			}
 
-			model.addAttribute("post", post); // JSP에서 값 채워서 표시
+			model.addAttribute("post", post); // JSP���� 媛� 梨����� ����
 			
 			if (post.getTags() != null && !post.getTags().isEmpty()) {
 	            StringBuilder sb = new StringBuilder();
 	            for (TagVO tag : post.getTags()) {
 	                sb.append(tag.getTagName()).append(",");
 	            }
-	            // 마지막 쉼표 제거
+	            // 留�吏�留� �쇳�� ��嫄�
 	            String tagString = sb.substring(0, sb.length() - 1);
 	            model.addAttribute("tagString", tagString);
 	        }	
@@ -96,11 +96,11 @@ public class MainController {
 		return "main/write";
 	}
 
-	// 게시글 등록 + 파일업로드
+	// 寃���湲� �깅� + ���쇱��濡���
 	@RequestMapping(value = "/write", method = RequestMethod.POST)
 	public String Write(BoardVO vo, @RequestParam("attach") MultipartFile file, HttpServletRequest request)
 			throws IllegalStateException, IOException {
-		// 로그인 정보를 조회한다.
+		// 濡�洹몄�� ��蹂대�� 議고������.
 		UserVO login = (UserVO) request.getSession().getAttribute("login");
 		if (login == null) {
 			return "redirect:/home";
@@ -108,23 +108,23 @@ public class MainController {
 		
 		System.out.println(vo);
 
-		// 게시글 작성자 아이디를 설정한다.
+		// 寃���湲� ���깆�� ���대��瑜� �ㅼ������.
 		vo.setId(login.getId());
 
 		if (vo.getBoardNo() != 0) {
-			// 수정 모드
+			// ���� 紐⑤��
 			BoardVO existing = boardRepository.selectBoardByNo(vo.getBoardNo());
 			if (!login.getId().equals(existing.getId())) {
-				return "redirect:/home"; // 작성자가 아니면 접근 거부
+				return "redirect:/home"; // ���깆��媛� ����硫� ��洹� 嫄곕�
 			}
 			boardRepository.updateBoard(vo);
 		} else {
-			// 새 글 작성
+			// �� 湲� ����
 			boardRepository.insertBoard(vo);
 		}
 
 		if (file != null && !file.isEmpty()) {
-			File uploadDir = new File(uploadPath); // 클래스 상수 사용
+			File uploadDir = new File(uploadPath); // �대���� ���� �ъ��
 			if (!uploadDir.exists())
 				uploadDir.mkdirs();
 
@@ -154,8 +154,8 @@ public class MainController {
 			boardRepository.insertFile(fvo);
 		}
 
-		// 4. 태그 처리
-		String tagInput = request.getParameter("tagName"); // 쉼표로 구분된 태그
+		// 4. ��洹� 泥�由�
+		String tagInput = request.getParameter("tagName"); // �쇳��濡� 援щ��� ��洹�
 		if (tagInput != null && !tagInput.isEmpty()) {
 			String[] tags = tagInput.split(",");
 			for (String t : tags) {
@@ -170,13 +170,13 @@ public class MainController {
 				        tagVO.setTagName(t);
 				        boardRepository.insertTag(tagVO);
 				    } catch (DuplicateKeyException e) {
-				        // 다른 세션에서 이미 insert됐을 경우 처리
+				        // �ㅻⅨ �몄������ �대�� insert���� 寃쎌�� 泥�由�
 				        tagVO = boardRepository.selectTagByName(t);
 				    }
 				}
 
-				// 게시글-태그 연결 시도
-				// 기존에 연결된 태그인지 확인 후 연결
+				// 寃���湲�-��洹� �곌껐 ����
+				// 湲곗〈�� �곌껐�� ��洹몄�몄� ���� �� �곌껐
 				if (tagVO != null && tagVO.getTagNo() != null) {
 				    if (!boardRepository.isTagBoardExists(vo.getBoardNo(), tagVO.getTagNo())) {
 				        TagBoardVO tb = new TagBoardVO();
@@ -190,39 +190,39 @@ public class MainController {
 		return "redirect:/home";
 	}
 
-	// 첨부파일 다운로드
+	// 泥⑤����� �ㅼ�대���
 	@RequestMapping(value = "/download", method = RequestMethod.GET)
 	public void downloadFile(@RequestParam("no") int fileNo, HttpServletResponse response) throws IOException {
-		//  File 정보 조회
-		FileVO fileVO = boardRepository.selectFileByNo(fileNo); // Repository에서 파일 조회
+		//  File ��蹂� 議고��
+		FileVO fileVO = boardRepository.selectFileByNo(fileNo); // Repository���� ���� 議고��
 		if (fileVO == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
-		//  실제 파일 경로
+		//  �ㅼ�� ���� 寃쎈�
 		String fullFileName = fileVO.getPhysicalFileName();
 
-		File file = new File(uploadPath, fullFileName); // 올바른 변수(fullFileName) 사용
+		File file = new File(uploadPath, fullFileName); // �щ�瑜� 蹂���(fullFileName) �ъ��
 		if (!file.exists()) {
-			// 이제 이 404가 발생하면 물리적 파일이 정말 없는 것입니다.
+			// �댁�� �� 404媛� 諛�����硫� 臾쇰━�� ���쇱�� ��留� ���� 寃�������.
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
-		// Controller.java (downloadFile 메서드 내)
-		// 수정된 부분:
+		// Controller.java (downloadFile 硫����� ��)
+		// ������ 遺�遺�:
 		String originalFileName = fileVO.getLogicalFileName();
 		String encodedFileName = java.net.URLEncoder.encode(originalFileName, "UTF-8").replaceAll("\\+", "%20");
 
 		response.setContentType("application/octet-stream");
 		response.setContentLength((int) file.length());
-		// Content-Disposition 설정 (따옴표 없이 깔끔하게 처리)
+		// Content-Disposition �ㅼ�� (�곗�댄�� ���� 源�����寃� 泥�由�)
 		response.setHeader("Content-Disposition", "attachment; filename=" + encodedFileName);
-		response.setHeader("Pragma", "no-cache"); // 캐싱 방지 추가 (권장)
+		response.setHeader("Pragma", "no-cache"); // 罹��� 諛⑹� 異�媛� (沅���)
 		response.setHeader("Expires", "0");
 
-		// 스트림으로 파일 전송
+		// �ㅽ�몃┝�쇰� ���� ����
 		try (FileInputStream fis = new FileInputStream(file); OutputStream os = response.getOutputStream()) {
 			byte[] buffer = new byte[1024];
 			int length;
@@ -233,7 +233,7 @@ public class MainController {
 		}
 	}
 	
-	//게시글 삭제
+	//寃���湲� ����
 	@PostMapping("/deleteBoard")
 	@ResponseBody
 	public String deleteBoard(@RequestParam("boardNo") int boardNo, HttpServletRequest request) {
@@ -251,18 +251,23 @@ public class MainController {
 	    return "SUCCESS";
 	}
 	
-	// AJAX로 fragment만 반환 (카테고리 필터용)
+	// AJAX濡� fragment留� 諛��� (移댄��怨�由� ���곗��)
 	@GetMapping("/home/posts")
 	public String getPostsByCategoryAndSort(
 	        @RequestParam(required = false, defaultValue = "0") int category,
 	        @RequestParam(required = false, defaultValue = "latest") String sort,
-	        Model model) {
+	        Model model,
+	        HttpServletRequest request,
+	        HttpSession session) {
 		
-		//1. 현재페이지
-		//2. 전체 게시글 개수
+		//1. ���ы���댁�
+		//2. ��泥� 寃���湲� 媛���
+		
+		String referer = request.getHeader("referer");
+		String userId = session.getAttribute("login") == null || referer.contains("home") ? null : ((UserVO)session.getAttribute("login")).getId();
 
 		
-	    List<BoardVO> boardList = boardRepository.selectBoardByCategory(category, sort);
+	    List<BoardVO> boardList = boardRepository.selectBoardByCategory(category, sort, userId);
 	    model.addAttribute("boardList", boardList);
 	    return "include/posts";
 	}

@@ -10,7 +10,7 @@ public class PointVO {
     private int pointAmount; // 포인트 변동량 (+/- 값)
     private int pointType; // 포인트 변동 타입 (예: 1: 적립, 2: 사용, 3: 보너스)
     private String pointReason; // 포인트 변동 사유
-    private LocalDateTime pointCreatedAt; // 포인트 기록 일시
+    private String pointCreatedAt; // 포인트 기록 일시
     private String id; // 대상 사용자 ID
     private Integer boardNo; // 관련 게시글 번호 (NULL 허용)
 
@@ -34,7 +34,7 @@ public class PointVO {
         return pointReason;
     }
 
-    public LocalDateTime getPointCreatedAt() {
+    public String getPointCreatedAt() {
         return pointCreatedAt;
     }
 
@@ -66,7 +66,7 @@ public class PointVO {
         this.pointReason = pointReason;
     }
 
-    public void setPointCreatedAt(LocalDateTime pointCreatedAt) {
+    public void setPointCreatedAt(String pointCreatedAt) {
         this.pointCreatedAt = pointCreatedAt;
     }
 

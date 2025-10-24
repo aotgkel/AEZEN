@@ -9,8 +9,8 @@ public class MessageRoomVO {
     private int roomNo; // 쪽지방 번호 (Primary Key)
     private String userIdA; // 사용자 A ID (두 사용자 중 ID가 사전 순으로 빠른 사람)
     private String userIdB; // 사용자 B ID
-    private LocalDateTime messageRoomCreatedAt; // 쪽지방 생성 일시
-    private LocalDateTime lastMessageAt; // 마지막 쪽지 전송 일시
+    private String messageRoomCreatedAt; // 쪽지방 생성 일시
+    private String lastMessageAt; // 마지막 쪽지 전송 일시
 
     // =============================
     // Getters
@@ -28,11 +28,11 @@ public class MessageRoomVO {
         return userIdB;
     }
 
-    public LocalDateTime getMessageRoomCreatedAt() {
+    public String getMessageRoomCreatedAt() {
         return messageRoomCreatedAt;
     }
 
-    public LocalDateTime getLastMessageAt() {
+    public String getLastMessageAt() {
         return lastMessageAt;
     }
 
@@ -52,11 +52,11 @@ public class MessageRoomVO {
         this.userIdB = userIdB;
     }
 
-    public void setMessageRoomCreatedAt(LocalDateTime messageRoomCreatedAt) {
+    public void setMessageRoomCreatedAt(String messageRoomCreatedAt) {
         this.messageRoomCreatedAt = messageRoomCreatedAt;
     }
 
-    public void setLastMessageAt(LocalDateTime lastMessageAt) {
+    public void setLastMessageAt(String lastMessageAt) {
         this.lastMessageAt = lastMessageAt;
     }
 }

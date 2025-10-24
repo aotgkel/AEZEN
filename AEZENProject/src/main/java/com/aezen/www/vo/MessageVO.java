@@ -1,6 +1,6 @@
 package com.aezen.www.vo;
 
-import java.time.LocalDateTime;
+
 
 /*
  * 클래스 기능 : 쪽지 정보 (message 테이블)
@@ -11,9 +11,9 @@ public class MessageVO {
     private String senderId; // 발신자 ID
     private String receiverId; // 수신자 ID
     private String messageContent; // 쪽지 내용
-    private LocalDateTime messageSentAt; // 전송 일시
-    private LocalDateTime messageReceivedAt; // 수신 일시
-    private LocalDateTime readAt; // 읽음 확인 일시 (NULL 허용)
+    private String messageSentAt; // 전송 일시
+    private String messageReceivedAt; // 수신 일시
+    private String readAt; // 읽음 확인 일시 (NULL 허용)
     private boolean messageDeleted; // 삭제 여부 (boolean 타입, true: 삭제됨)
 
     // =============================
@@ -40,15 +40,15 @@ public class MessageVO {
         return messageContent;
     }
 
-    public LocalDateTime getMessageSentAt() {
+    public String getMessageSentAt() {
         return messageSentAt;
     }
 
-    public LocalDateTime getMessageReceivedAt() {
+    public String getMessageReceivedAt() {
         return messageReceivedAt;
     }
 
-    public LocalDateTime getReadAt() {
+    public String getReadAt() {
         return readAt;
     }
 
@@ -81,19 +81,24 @@ public class MessageVO {
         this.messageContent = messageContent;
     }
 
-    public void setMessageSentAt(LocalDateTime messageSentAt) {
+    public void setMessageSentAt(String messageSentAt) {
         this.messageSentAt = messageSentAt;
     }
 
-    public void setMessageReceivedAt(LocalDateTime messageReceivedAt) {
+    public void setMessageReceivedAt(String messageReceivedAt) {
         this.messageReceivedAt = messageReceivedAt;
     }
 
-    public void setReadAt(LocalDateTime readAt) {
+    public void setReadAt(String readAt) {
         this.readAt = readAt;
     }
 
     public void setMessageDeleted(boolean messageDeleted) {
         this.messageDeleted = messageDeleted;
     }
+
+	public void setReceiverId(int roomNo2, String senderId2) {
+		// TODO Auto-generated method stub
+		
+	}
 }

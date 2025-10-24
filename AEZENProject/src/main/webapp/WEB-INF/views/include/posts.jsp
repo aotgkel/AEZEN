@@ -5,6 +5,10 @@
 
 <!-- 게시글 -->
 <div class="posts">
+	
+	<c:if test="${fn:contains(pageContext.request.requestURI, 'mypage')}">
+		<div id="posts-panel" class="content-panel">
+	</c:if>
 
 	<!-- 게시글 예시 2 -->
 	<c:forEach items="${boardList}" var="post">
@@ -175,4 +179,7 @@
 			</div>
 		</div>
 	</c:forEach>
+	<c:if test="${fn:contains(pageContext.request.requestURI, 'mypage')}">
+		</div>
+	</c:if>
 </div>

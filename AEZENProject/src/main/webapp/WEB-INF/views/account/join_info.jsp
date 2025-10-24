@@ -4,7 +4,7 @@
 <%@ include file="/WEB-INF/views/include/header.jsp"%>
 
 <link rel="stylesheet" href="resources/css/join_info.css">
-<script src="resources/js/join_info.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/join_info.js"></script>
 
 
   <!---------------- 메인영역 ---------------------->
@@ -34,10 +34,10 @@
 
           <div class="post">
             <h2>정보입력</h2>
-            <form action="/register" method="POST">
+            <form action="${pageContext.request.contextPath}/account/signupok" method="POST">
             
             <label for="userid">아이디</label>
-            <input type="text" id="userid" name="userid" required> 
+            <input type="text" id="userid" name="id" required> 
             <div class="message" id="userid-message"></div>      
             
             <label for="password">비밀번호</label>
@@ -46,8 +46,12 @@
             <label for="confirm-password">비밀번호 확인</label>
             <input type="password" id="confirm-password" name="confirm-password" required>
             
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" required>
+            <div class="message" id="name-message"></div>
+            
             <label for="nickname">닉네임</label>
-            <input type="text" id="nickname" name="nickname" required>
+            <input type="text" id="nickname" name="nick" required>
             <div class="message" id="nickname-message"></div>    
 
             <label for="email">이메일</label>
@@ -61,23 +65,9 @@
                 <button type="button">입력</button>
             </div>
 
-            <label for="birthdate">생년월일</label>
-            <input type="date" id="birthdate" name="birthdate" required>
-
-            <label for="address">주소</label>
-            <div class="input-group">
-                <input type="text" id="address" name="address" required>
-                <button type="button">찾기</button>
-            </div>
-
-            <div class="captcha">
-                <label for="captcha">자동등록방지 문자</label>
-            </div>
-                <!-- reCAPTCHA 영역 -->
-                <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
-                <!-- reCAPTCHA 스크립트 -->
-                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
+            
+                
+			
             <div class="button-group">
                 <button type="submit">등록</button>
                 <button type="reset">취소</button>
@@ -93,7 +83,7 @@
         <div class="sidebar">
         <div class="ad-top">
           <a href="https://www.eduwill.net/sites/home" target="_blank">
-            <img src="resources/img/adbaner.jpg" alt="광고 이미지">
+            <img src="${pageContext.request.contextPath}/resources/img/adbaner.jpg" alt="광고 이미지">
           </a>
         </div>
 

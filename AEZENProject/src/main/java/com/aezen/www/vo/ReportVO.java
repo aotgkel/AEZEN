@@ -1,6 +1,6 @@
 package com.aezen.www.vo;
 
-import java.time.LocalDateTime;
+
 
 /*
  * 클래스 기능 : 신고 정보 (report 테이블)
@@ -11,9 +11,9 @@ public class ReportVO {
     private int reportCategory; // 신고 카테고리 (예: 1: 욕설, 2: 광고 등)
     private String reportContent; // 신고 내용
     private int boardNo; // 신고된 게시글 번호
-    private LocalDateTime reportedAt; // 신고 일시
+    private String reportedAt; // 신고 일시
     private int reportStatus; // 처리 상태 (예: 0: 대기, 1: 처리 중, 2: 완료)
-    private LocalDateTime reportUpdatedAt; // 신고 처리 업데이트 일시
+    private String reportUpdatedAt; // 신고 처리 업데이트 일시
 
     // =============================
     // Getters
@@ -39,7 +39,7 @@ public class ReportVO {
         return boardNo;
     }
 
-    public LocalDateTime getReportedAt() {
+    public String getReportedAt() {
         return reportedAt;
     }
 
@@ -47,7 +47,7 @@ public class ReportVO {
         return reportStatus;
     }
 
-    public LocalDateTime getReportUpdatedAt() {
+    public String getReportUpdatedAt() {
         return reportUpdatedAt;
     }
 
@@ -75,7 +75,7 @@ public class ReportVO {
         this.boardNo = boardNo;
     }
 
-    public void setReportedAt(LocalDateTime reportedAt) {
+    public void setReportedAt(String reportedAt) {
         this.reportedAt = reportedAt;
     }
 
@@ -83,7 +83,7 @@ public class ReportVO {
         this.reportStatus = reportStatus;
     }
 
-    public void setReportUpdatedAt(LocalDateTime reportUpdatedAt) {
+    public void setReportUpdatedAt(String reportUpdatedAt) {
         this.reportUpdatedAt = reportUpdatedAt;
     }
 }

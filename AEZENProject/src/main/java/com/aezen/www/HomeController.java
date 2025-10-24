@@ -42,12 +42,7 @@ public class HomeController {
 		return "main/minigame";
 	}
 	
-	@RequestMapping(value = "/mypage", method = RequestMethod.GET)
-	public String mypage(Locale locale, Model model) {
-		
-		
-		return "main/mypage";
-	}
+	
 	
 	@RequestMapping(value = "/join_agree", method = RequestMethod.GET)
 	public String join_agree(Locale locale, Model model) {

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aezen.www.repository.MessageRepository">
+
+  <!-- 📬 MessageRoom -->
+  <select id="findRoomByUsers" parameterType="map" resultType="com.aezen.www.vo.MessageRoomVO">
+    SELECT 
+      room_no AS roomNo,
+      user_id_a AS userIdA,
+      user_id_b AS userIdB,
+      message_room_created_at AS messageRoomCreatedAt,
+      last_message_at AS lastMessageAt
+    FROM message_room
+    WHERE (user_id_a = #{userIdA} AND user_id_b = #{userIdB})
+       OR (user_id_a = #{userIdB} AND user_id_b = #{userIdA})
+    LIMIT 1
+  </select>
+
+  <insert id="insertMessageRoom" parameterType="com.aezen.www.vo.MessageRoomVO" useGeneratedKeys="true" keyProperty="roomNo">
+    INSERT INTO message_room (user_id_a, user_id_b, message_room_created_at, last_message_at)
+    VALUES (#{userIdA}, #{userIdB}, NOW(), NOW())
+  </insert>
+
+  <update id="updateRoomLastMessageAt" parameterType="int">
+    UPDATE message_room SET last_message_at = NOW() WHERE room_no = #{roomNo}
+  </update>
+
+  <select id="getRoomsByUser" parameterType="string" resultType="com.aezen.www.vo.MessageRoomVO">
+    SELECT 
+      room_no AS roomNo,
+      user_id_a AS userIdA,
+      user_id_b AS userIdB,
+      message_room_created_at AS messageRoomCreatedAt,
+      last_message_at AS lastMessageAt
+    FROM message_room
+    WHERE user_id_a = #{userId} OR user_id_b = #{userId}
+    ORDER BY last_message_at DESC
+  </select>
+
+  <!-- 💌 Message -->
+  <insert id="insertMessage" parameterType="com.aezen.www.vo.MessageVO" useGeneratedKeys="true" keyProperty="messageNo">
+    INSERT INTO message (room_no, sender_id, receiver_id, message_content, message_sent_at, message_deleted)
+    VALUES (#{roomNo}, #{senderId}, #{receiverId}, #{messageContent}, NOW(), FALSE)
+  </insert>
+
+  <select id="getMessagesByRoom" parameterType="int" resultType="com.aezen.www.vo.MessageVO">
+    SELECT
+        message_no AS messageNo,
+        room_no AS roomNo,
+        sender_id AS senderId,
+        receiver_id AS receiverId,
+        message_content AS messageContent,
+        message_sent_at AS messageSentAt,
+        message_received_at AS messageReceivedAt,
+        read_at AS readAt,
+        message_deleted AS messageDeleted
+    FROM message
+    WHERE room_no = #{roomNo}
+      AND message_deleted = FALSE
+    ORDER BY message_sent_at ASC
+  </select>
+
+  <select id="getMessageByNo" parameterType="int" resultType="com.aezen.www.vo.MessageVO">
+    SELECT
+        message_no AS messageNo,
+        room_no AS roomNo,
+        sender_id AS senderId,
+        receiver_id AS receiverId,
+        message_content AS messageContent,
+        message_sent_at AS messageSentAt,
+        message_received_at AS messageReceivedAt,
+        read_at AS readAt,
+        message_deleted AS messageDeleted
+    FROM message
+    WHERE message_no = #{messageNo}
+  </select>
+
+  <update id="updateReadAt" parameterType="int">
+    UPDATE message SET read_at = NOW() WHERE message_no = #{messageNo}
+  </update>
+
+  <update id="deleteMessage" parameterType="int">
+    UPDATE message SET message_deleted = TRUE WHERE message_no = #{messageNo}
+  </update>
+
+  <select id="getReceivedMessages" parameterType="string" resultType="com.aezen.www.vo.MessageVO">
+    SELECT
+        message_no AS messageNo,
+        room_no AS roomNo,
+        sender_id AS senderId,
+        receiver_id AS receiverId,
+        message_content AS messageContent,
+        message_sent_at AS messageSentAt,
+        message_received_at AS messageReceivedAt,
+        read_at AS readAt,
+        message_deleted AS messageDeleted
+    FROM message
+    WHERE receiver_id = #{receiverId}
+      AND message_deleted = FALSE
+    ORDER BY message_sent_at DESC
+  </select>
+
+  <select id="getSentMessages" parameterType="string" resultType="com.aezen.www.vo.MessageVO">
+    SELECT
+        message_no AS messageNo,
+        room_no AS roomNo,
+        sender_id AS senderId,
+        receiver_id AS receiverId,
+        message_content AS messageContent,
+        message_sent_at AS messageSentAt,
+        message_received_at AS messageReceivedAt,
+        read_at AS readAt,
+        message_deleted AS messageDeleted
+    FROM message
+    WHERE sender_id = #{senderId}
+      AND message_deleted = FALSE
+    ORDER BY message_sent_at DESC
+  </select>
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace: Repository 인터페이스 경로로 수정 -->
+<mapper namespace="com.aezen.www.repository.FollowRepository">
+
+    <!-- FollowVO는 단순 관계 저장이므로 resultMap을 사용하지 않고 직접 매핑 -->
+
+    <!-- 1. 팔로우 요청 (FollowVO 삽입) -->
+    <!-- FOLLOWING_ID: 팔로우를 거는 사람 (Initiator) -->
+    <!-- FOLLOWED_ID: 팔로우 당하는 사람 (Target) -->
+    <insert id="insertFollow" parameterType="com.aezen.www.vo.FollowVO">
+        INSERT INTO follow (
+            FOLLOWING_ID,
+            FOLLOWED_ID,
+            FOLLOW_STARTED_AT
+        ) VALUES (
+            #{followingId},
+            #{followedId},
+            NOW() 
+        )
+    </insert>
+
+    <!-- 2. 언팔로우 (팔로우 관계 삭제) -->
+    <delete id="deleteFollow" parameterType="com.aezen.www.vo.FollowVO">
+        DELETE FROM follow
+        WHERE FOLLOWING_ID = #{followingId}
+          AND FOLLOWED_ID = #{followedId}
+    </delete>
+
+    <!-- 3. 팔로우 상태 확인 (이미 팔로우 중인지 체크) -->
+    <select id="countFollowStatus" parameterType="com.aezen.www.vo.FollowVO" resultType="int">
+        SELECT COUNT(*)
+        FROM follow
+        WHERE FOLLOWING_ID = #{followingId}
+          AND FOLLOWED_ID = #{followedId}
+    </select>
+    
+    <!-- 4. 특정 사용자의 팔로워 목록 조회 (나를 팔로우 하는 사람) -->
+    <!-- 결과 타입: UserVO (팔로워의 프로필 정보를 반환) -->
+    <select id="getFollowers" parameterType="String" resultType="com.aezen.www.vo.UserVO">
+        SELECT 
+            u.id, 
+            u.nick
+            
+            
+        FROM follow f
+        <!-- f.FOLLOWING_ID(팔로우 건 사람)의 정보를 가져와야 하므로 이 ID로 t_user를 JOIN -->
+        JOIN user u ON f.FOLLOWING_ID = u.id 
+        WHERE f.FOLLOWED_ID = #{followedId} <!-- FOLLOWED_ID는 조회 대상(나)의 ID -->
+        <!-- TODO 내가 팔로우 하고있는지도 조회 -->
+        ORDER BY f.FOLLOW_STARTED_AT DESC
+    </select>
+
+    <!-- 5. 특정 사용자의 팔로잉 목록 조회 (내가 팔로우 하는 사람) -->
+    <!-- 결과 타입: UserVO (팔로잉 대상의 프로필 정보를 반환) -->
+    <select id="getFollowings" parameterType="String" resultType="com.aezen.www.vo.UserVO">
+        SELECT 
+            u.id, 
+            u.nick
+            
+            
+        FROM follow f
+        <!-- f.FOLLOWED_ID(팔로우 당한 사람)의 정보를 가져와야 하므로 이 ID로 t_user를 JOIN -->
+        JOIN user u ON f.FOLLOWED_ID = u.id 
+        WHERE f.FOLLOWING_ID = #{followingId} <!-- FOLLOWING_ID는 조회 대상(나)의 ID -->
+        ORDER BY f.FOLLOW_STARTED_AT DESC
+    </select>
+</mapper>

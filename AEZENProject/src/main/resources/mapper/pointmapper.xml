@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aezen.www.repository.PointRepository">
+
+  <!-- 📜 포인트 내역 조회 (누적포인트 포함) -->
+  <select id="getPointHistory" parameterType="string" resultType="com.aezen.www.vo.PointVO">
+  SELECT 
+      p.point_no AS pointNo,
+      p.point_amount AS pointAmount,
+      p.point_type AS pointType,
+      p.point_reason AS pointReason,
+      DATE_FORMAT(p.point_created_at, '%Y-%m-%d %H:%i:%s') AS pointCreatedAt,
+      p.id,
+      p.board_no AS boardNo,
+
+      -- 💰 누적 포인트 계산 (1=사용→차감, 2=적립→추가)
+      SUM(
+        CASE 
+          WHEN p.point_type = 1 THEN -p.point_amount   -- 사용이면 빼기
+          WHEN p.point_type = 2 THEN p.point_amount    -- 적립이면 더하기
+          ELSE 0
+        END
+      ) OVER (
+        ORDER BY p.point_created_at, p.point_no
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+      ) AS cumulativePoint
+
+  FROM point p
+  WHERE p.id = #{id}
+  ORDER BY p.point_created_at ASC, p.point_no DESC
+</select>
+
+  <!-- 💰 포인트 적립 / 사용 기록 추가 -->
+  <insert id="insertPoint" parameterType="com.aezen.www.vo.PointVO">
+  INSERT INTO point 
+  (id, point_amount, point_type, point_reason, point_created_at)
+  VALUES
+  (#{id}, #{pointAmount}, #{pointType}, #{pointReason}, NOW());
+</insert>
+
+<!-- 포인트 추가 시 user 테이블의 현재 잔여 포인트 업데이트 -->
+<update id="updateUserCurrentPoint" parameterType="com.aezen.www.vo.PointVO">
+  UPDATE user
+  SET user_current_point = user_current_point +
+  CASE 
+    WHEN #{pointType} = 2 THEN #{pointAmount}  <!-- 적립 -->
+    WHEN #{pointType} = 1 THEN -#{pointAmount} <!-- 차감 -->
+    ELSE 0
+  END
+  WHERE id = #{id};
+</update>
+<!--  포인트 삭제 -->
+	<delete id="deletePoint" parameterType="int">
+	  DELETE FROM point WHERE point_no = #{pointNo}
+	</delete>
+</mapper>

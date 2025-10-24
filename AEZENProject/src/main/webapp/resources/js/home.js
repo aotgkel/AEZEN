@@ -860,15 +860,6 @@ if (isCommentSubmit || isAnswerSubmit) {
 	let socket; // 전역 WebSocket 객체
 	
 	// ===== 초기 접속자 수 가져오기 =====
-fetch(`${contextPath}/userCount`)
-  .then(res => res.json())
-  .then(data => {
-      const userCountEl = document.getElementById("user-count");
-      if (userCountEl && data.userCount !== undefined) {
-          userCountEl.textContent = data.userCount;
-      }
-  })
-  .catch(err => console.error('초기 접속자 수 가져오기 실패:', err));
 	
 	// ===== WebSocket 연결 함수 =====
 	function connectWebSocket() {

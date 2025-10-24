@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class BlockVO {
     private String blockerId; // 차단을 요청한 사용자 ID (Primary Key 일부)
     private String blockedId; // 차단을 당한 사용자 ID (Primary Key 일부)
-    private LocalDateTime blockedAt; // 차단 시작 일시
+    private String blockedAt; // 차단 시작 일시
 
     // =============================
     // Getters
@@ -22,7 +22,7 @@ public class BlockVO {
         return blockedId;
     }
 
-    public LocalDateTime getBlockedAt() {
+    public String getBlockedAt() {
         return blockedAt;
     }
 
@@ -38,7 +38,7 @@ public class BlockVO {
         this.blockedId = blockedId;
     }
 
-    public void setBlockedAt(LocalDateTime blockedAt) {
+    public void setBlockedAt(String blockedAt) {
         this.blockedAt = blockedAt;
     }
 }

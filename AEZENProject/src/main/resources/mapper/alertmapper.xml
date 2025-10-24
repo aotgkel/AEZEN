@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aezen.www.repository.AlertRepository">
+
+  <!-- ✅ 사용자 알림 내역 조회 -->
+  <select id="selectAlertsByUserId" parameterType="string" resultType="com.aezen.www.vo.AlertVO">
+    SELECT 
+      alert_no AS alertNo,
+      id,
+      alert_id AS alertId,
+      alert_type AS alertType,
+      alert_content AS alertContent,
+      DATE_FORMAT(alerted_at, '%Y-%m-%d %H:%i:%s') AS alertedAt,
+      target_board_no AS targetBoardNo,
+      target_comment_answer_no AS targetCommentAnswerNo
+    FROM alert
+    WHERE id = #{id}
+    ORDER BY alerted_at DESC, alert_no DESC
+  </select>
+
+  <!-- ✅ 개별 알림 삭제 -->
+  <delete id="deleteAlert" parameterType="int">
+    DELETE FROM alert WHERE alert_no = #{alertNo}
+  </delete>
+
+  <!-- ✅ 다중 알림 삭제 -->
+  <delete id="deleteSelectedAlerts" parameterType="list">
+    DELETE FROM alert WHERE alert_no IN
+    <foreach collection="list" item="no" open="(" separator="," close=")">
+      #{no}
+    </foreach>
+  </delete>
+
+  <!-- ✅ 알림 추가 -->
+  <insert id="insertAlert" parameterType="com.aezen.www.vo.AlertVO">
+    INSERT INTO alert (
+      id, alert_id, alert_type, alert_content, alerted_at, target_board_no, target_comment_answer_no
+    ) VALUES (
+      #{id}, #{alertId}, #{alertType}, #{alertContent}, NOW(), #{targetBoardNo}, #{targetCommentAnswerNo}
+    )
+  </insert>
+
+</mapper>

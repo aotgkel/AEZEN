@@ -1,13 +1,29 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ include file="/WEB-INF/views/include/header.jsp"%>
 
-<link rel="stylesheet" href="resources/css/mypage.css">
-<script src="resources/js/mypage.js"></script>
+<!-- ✅ 마이페이지 전용 스타일 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/mypage.css">
+
+<!-- ✅ 전역 변수 설정: contextPath / 로그인 사용자 -->
+<script>
+  // JSP에서 전역 변수만 한 번만 선언 — 중복 방지
+  window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+  window.LOGGED_IN_USER_ID = '${sessionScope.login.id}'; // 세션 로그인 정보
+  
+</script>
+
+<!-- ✅ JS 파일 로드 -->
+<script src="${pageContext.request.contextPath}/resources/js/mypage.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/message.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/point-history.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/alert.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/edit.js"></script>
+
   <!---------------- 메인영역 ---------------------->
   <body>
-  <main>
+  <main data-page-owner-id="${pageOwnerId}" <c:if test="${not empty loginUser}">data-login-user-id="${loginUser.id}"</c:if>>
     <!-- 컨테이너 (게시글 래퍼 + 사이드바) -->
     <!-- 수정 시, 게시글 래퍼 전체수정 or 게시글 수정 -->
     <div class="container">
@@ -16,7 +32,7 @@
       <div class="posts-wrapper">
 
         <!-- 공지/정렬버튼 -->
-        <div class="notice-bar">
+        <!-- <div class="notice-bar">
         <div class="notice-row">
 
           <div class="notice-text">
@@ -41,441 +57,82 @@
           </div>
         </div>
         </div>
-
+ -->
         <!-- 게시글 -->
-        <div class="posts">
-
-          <!-------------- 내글관리 패널----------------->
-          <div id="posts-panel" class="content-panel">
-          <!-- 게시글 예시 1 -->
-          <div class="post">
-
-            <div class="post-header">
-              <span class="kind">[자유]</span>
-              <span class="title">무난하게 3부 상대로 대승! 승리의 프랭크호 ....</span>
-              <span class="nick dropdown">작성자: 고길동
-                <ul class="dropdown-menu">
-                  <li><a href="#">프로필 보기</a></li>
-                  <li><a href="#">팔로우 하기</a></li>
-                  <li><a href="#">메세지 보내기</a></li>
-                  <li><a href="#">차단하기</a></li>
-                </ul>
-              </span>
-              <span class="hit">조회수: 10</span>
-              <span class="wdate">작성일: 2025.09.25 09:23</span>
-              <span class="report" data-post-id="1">🚨 신고하기</span>
-            </div>
-
-            <div class="post-body">
-              <a href="ezen_logo.jpg" class="upload">첨부파일 없음</a>
-              <div class="bnote">긴글 예시 / 긴글예시 / 긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /
-                (이런 식으로 긴 글이 들어간다고 가정)
-              </div>           
-              <!-- 이미지 미리보기 -->
-              <div class="post-images" style="display: none;">
-                <img src="resources/img/img1.jpg" alt="첨부 이미지">
-                <img src="resources/img/img2.jpg" alt="첨부 이미지">
-              </div>
-              <br>
-              <div class="tag">
-                <a href="/tags/공지">#공지</a>
-                <a href="/tags/이벤트">#이벤트</a>
-                <a href="/tags/업데이트">#업데이트</a>
-              </div>
-            </div>
-
-            <div class="post-footer">
-              <span class="comment">댓글 24개</span>
-              <div class="votes">
-              <span class="post-up">추천 24 👍</span>
-              <span class="post-down">비추천 2 👎</span>
-             </div>
-            <div class="post-actions">
-              <a href="write.html" class="edit-btn">수정</a>
-              <span class="delete-btn" data-type="post">삭제</span>
-            </div>
-            <a href="#" class="more">더보기</a>
-          </div>
-
-          <!-- 댓글 영역 -->
-          <br>
-          <div class="comments">
-            <div class="comment-item" data-id="1">
-              <span class="c-text">첫 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-              <div class="comment-actions">
-                <span class="edit-btn">수정</span>
-                <span class="delete-btn" data-type="comment">삭제</span>
-              </div>
-            </div>
-            <div class="comment-item" data-id="2">
-              <span class="c-text">두 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-              <div class="comment-actions">
-                <span class="edit-btn">수정</span>
-                <span class="delete-btn" data-type="comment">삭제</span>
-              </div>
-            </div>
-            <div class="comment-item" data-id="3">
-              <span class="c-text">세 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-              <div class="comment-actions">
-                <span class="edit-btn">수정</span>
-                <span class="delete-btn" data-type="comment">삭제</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 댓글 입력창 -->
-          <div class="comment-form" style="display: none;">
-            <textarea placeholder="댓글을 입력하세요..."></textarea>
-            <button type="button" class="submit-comment">작성</button>
-          </div>
-          </div>
-          
-
-
-
-
-
-          <!-- 게시글 예시 2 -->
-          <div class="post">
-
-            <div class="post-header">
-              <span class="kind">[코딩테스트]</span>
-              <span class="title">if문을 이용한 5가지 문제 풀어보세요 ....</span>
-              <span class="nick dropdown">작성자: 고길동
-                <ul class="dropdown-menu">
-                  <li><a href="#">프로필 보기</a></li>
-                  <li><a href="#">팔로우 하기</a></li>
-                  <li><a href="#">메세지 보내기</a></li>
-                  <li><a href="#">차단하기</a></li>
-                </ul>
-              </span>
-              <span class="hit">조회수: 10</span>
-              <span class="wdate">작성일: 2025.09.25 09:23</span>
-              <span class="report" data-post-id="2">🚨 신고하기</span>
-            </div>
-
-            <div class="post-body">
-              <a href="resources/img/ezen_logo.jpg" class="upload">첨부파일 없음</a>
-              <div class="bnote">긴글 예시 / 긴글예시 / 긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /
-              (이런 식으로 긴 글이 들어간다고 가정)</div>
-              <br>
-              <div class="tag">
-                <a href="/tags/공지">#공지</a>
-                <a href="/tags/이벤트">#이벤트</a>
-                <a href="/tags/업데이트">#업데이트</a>
-              </div>
-            </div>
-
-              <!-- 답안 토글 -->
-              <div class="answer-toggle">
-                <button class="answer-btn">답안 작성 / 모아보기</button>
-              </div>
-              <!-- 답안 영역 -->
-              <div class="answers">
-                <div class="answer-list">
-                  <div class="answer-item" data-id="1">
-                    <div class="a-text">이 문제는 이렇게 풀 수 있습니다...</div>
-                    <div class="a-footer">
-                      <span class="author">by 익명</span>
-                      <div class="answer-actions">
-                        <span class="edit-btn">수정</span>
-                        <span class="delete-btn" data-type="answer">삭제</span>
-                      </div>
-                      <button class="a-choice">채택</button>
-                    </div>
-                  </div>
-                  <div class="answer-item" data-id="2">
-                    <div class="a-text">이 문제는 이렇게 풀 수 있습니다...</div>
-                    <div class="a-footer">
-                      <span class="author">by 익명</span>
-                      <div class="answer-actions">
-                        <span class="edit-btn">수정</span>
-                        <span class="delete-btn" data-type="answer">삭제</span>
-                      </div>
-                      <button class="a-choice">채택</button>
-                    </div>
-                  </div>
-                </div>
-                <!-- 답안 입력 창-->
-                <form class="answer-form">
-                  <textarea placeholder="답안을 작성해보세요..." required></textarea>
-                  <button type="submit">등록</button>
-                </form>
-              </div>
-
-              <div class="post-footer">
-              <span class="comment">댓글 24개</span>
-              <div class="votes">
-                <span class="post-up">추천 24 👍</span>
-                <span class="post-down">비추천 2 👎</span>
-              </div>
-              <div class="post-actions">
-                <a href="write.html" class="edit-btn">수정</a>
-                <span class="delete-btn" data-type="post">삭제</span>
-              </div>
-              <a href="#" class="more">더보기</a>
-              </div>
-
-              <!-- 댓글 영역 -->
-              <br>
-              <div class="comments">
-                <div class="comment-item" data-id="1">
-                  <span class="c-text">첫 번째 댓글 내용입니다.</span>
-                  <div class="c-votes">
-                    <span class="comment-up">👍</span>
-                    <span class="comment-down">👎</span>
-                  </div>
-                <div class="comment-actions">
-                  <span class="edit-btn">수정</span>
-                  <span class="delete-btn" data-type="comment">삭제</span>
-                </div>
-                </div>
-                <div class="comment-item" data-id="2">
-                  <span class="c-text">두 번째 댓글 내용입니다.</span>
-                  <div class="c-votes">
-                    <span class="comment-up">👍</span>
-                    <span class="comment-down">👎</span>
-                  </div>
-                <div class="comment-actions">
-                  <span class="edit-btn">수정</span>
-                  <span class="delete-btn" data-type="comment">삭제</span>
-                </div>
-                </div>
-                <div class="comment-item" data-id="3">
-                  <span class="c-text">세 번째 댓글 내용입니다.</span>
-                  <div class="c-votes">
-                    <span class="comment-up">👍</span>
-                    <span class="comment-down">👎</span>
-                  </div>
-                <div class="comment-actions">
-                  <span class="edit-btn">수정</span>
-                  <span class="delete-btn" data-type="comment">삭제</span>
-                </div>
-                </div>
-              </div>
-              <!-- 댓글 입력창 -->
-              <div class="comment-form" style="display: none;">
-                <textarea placeholder="댓글을 입력하세요..."></textarea>
-                <button type="button" class="submit-comment">작성</button>
-              </div>
-          </div>
-
-
-
-
-
-
-
-
-
-          <!-- 게시글 예시 3 -->
-          <div class="post">
-
-            <div class="post-header">
-              <span class="kind">[Q&A]</span>
-              <span class="title">급해요 이기능 어떻게 구현하나요 ㅠㅠ</span>
-              <span class="nick dropdown">
-                작성자: 신입이
-                <ul class="dropdown-menu">
-                  <li><a href="#">프로필 보기</a></li>
-                  <li><a href="#">팔로우 하기</a></li>
-                  <li><a href="#">메세지 보내기</a></li>
-                  <li><a href="#">차단하기</a></li>
-                </ul>
-              </span>
-              <span class="hit">조회수: 10</span>
-              <span class="wdate">작성일: 2025.09.25 09:23</span>
-              <span class="report" data-post-id="2">🚨 신고하기</span>
-            </div>
-
-            <div class="post-body">
-              <a href="resources/img/ezen_logo.jpg" class="upload">첨부파일 없음</a>
-              <div class="bnote">긴글 예시 / 긴글예시 / 긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /긴글 예시 / 긴글예시 /
-              (이런 식으로 긴 글이 들어간다고 가정)</div>
-              <br>
-              <div class="tag">
-                <a href="/tags/공지">#공지</a>
-                <a href="/tags/이벤트">#이벤트</a>
-                <a href="/tags/업데이트">#업데이트</a>
-              </div>
-            </div>
-
-            <!-- 답안 버튼 -->
-            <div class="answer-toggle">
-              <button class="answer-btn">답변 작성 / 모아보기</button>
-            </div>
-            <!-- 답안 영역 -->
-            <div class="answers">
-              <div class="answer-list">
-                <div class="answer-item" data-id="1">
-                  <div class="a-text">그 기능은 이렇게 저렇게...</div>
-                  <div class="a-footer">
-                    <span class="author">by 개고수</span>
-                      <div class="answer-actions">
-                        <span class="edit-btn">수정</span>
-                        <span class="delete-btn" data-type="answer">삭제</span>
-                      </div>
-                    <button class="a-choice">채택</button>
-                  </div>
-                </div>
-                <div class="answer-item" data-id="2">
-                  <div class="a-text">퇴사가 답...</div>
-                  <div class="a-footer">
-                    <span class="author">by 번아웃러</span>
-                      <div class="answer-actions">
-                        <span class="edit-btn">수정</span>
-                        <span class="delete-btn" data-type="answer">삭제</span>
-                      </div>
-                    <button class="a-choice">채택</button>
-                  </div>
-                </div>
-              </div>
-              <!-- 답안 작성 폼 -->
-              <form class="answer-form">
-                <textarea placeholder="답변을 작성해보세요..." required></textarea>
-                <button type="submit">등록</button>
-              </form>
-            </div>
-
-           <div class="post-footer">
-            <span class="comment">댓글 24개</span>
-            <div class="votes">
-            <span class="post-up">추천 24 👍</span>
-            <span class="post-down">비추천 2 👎</span>
-            </div>
-            <div class="post-actions">
-            <a href="write.html" class="edit-btn">수정</a>
-            <span class="delete-btn" data-type="post">삭제</span>
-            </div>
-            <a href="#" class="more">더보기</a>
-          </div>
-
-          <!-- 댓글 영역 -->
-          <br>
-          <div class="comments">
-            <div class="comment-item" data-id="1">
-              <span class="c-text">첫 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-            <div class="comment-actions">
-              <span class="edit-btn">수정</span>
-              <span class="delete-btn" data-type="comment">삭제</span>
-            </div>
-            </div>
-            <div class="comment-item" data-id="2">
-              <span class="c-text">두 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-            <div class="comment-actions">
-              <span class="edit-btn">수정</span>
-              <span class="delete-btn" data-type="comment">삭제</span>
-            </div>
-            </div>
-            <div class="comment-item" data-id="3">
-              <span class="c-text">세 번째 댓글 내용입니다.</span>
-              <div class="c-votes">
-                <span class="comment-up">👍</span>
-                <span class="comment-down">👎</span>
-              </div>
-            <div class="comment-actions">
-              <span class="edit-btn">수정</span>
-              <span class="delete-btn" data-type="comment">삭제</span>
-            </div>
-            </div>
-          </div>
-            <!-- 댓글 입력창 -->
-            <div class="comment-form" style="display: none;">
-              <textarea placeholder="댓글을 입력하세요..."></textarea>
-              <button type="button" class="submit-comment">작성</button>
-            </div>
-           </div>
-           </div>
-        </div> 
-
+        <div id="postContainer">
+			<%@ include file="/WEB-INF/views/include/posts.jsp" %>
+		</div>
         <!-- 글쓰기 버튼 -->
         <button id="writeBtn" class="write-btn">✏</button>
 
       <!-----------------정보수정 패널--------------------->
-      <div id="edit-panel" class="content-panel hidden">
-        <div class="info-edit-wrapper">
-          <h2>회원 정보 수정</h2>
-          <form class="edit-form">
-            <label for="userid">아이디</label>
-            <input type="text" id="userid" name="userid" value="ezen_user123" readonly>
+<div id="edit-panel" class="content-panel hidden">
+  <div class="info-edit-wrapper">
+    <h2>회원 정보 수정</h2>
+    <form class="edit-form">
+      <label for="userid">아이디</label>
+      <input type="text" id="userid" name="userid" value="${loginUserId}" readonly>
 
-            <label for="password">비밀번호</label>
-            <input type="password" id="password" name="password" placeholder="새 비밀번호 입력">
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" name="password" placeholder="새 비밀번호 입력">
 
-            <label for="confirm-password">비밀번호 확인</label>
-            <input type="password" id="confirm-password" name="confirm-password" placeholder="비밀번호 확인">
+      <label for="confirm-password">비밀번호 확인</label>
+      <input type="password" id="confirm-password" name="confirm-password" placeholder="비밀번호 확인">
 
-            <label for="nickname">닉네임</label>
-            <div class="input-group">
-              <input type="text" id="nickname" name="nickname" placeholder="닉네임 입력">
-              <button type="button">중복확인</button>
-            </div>
-
-            <label for="email">이메일</label>
-            <div class="input-group">
-              <input type="email" id="email" name="email" placeholder="이메일 주소 입력">
-              <button type="button">이메일 인증</button>
-            </div>
-
-            <label for="birth">생년월일</label>
-            <input type="text" id="birth" name="birth" value="1995-08-12" readonly>
-
-            <div class="form-actions">
-              <button type="submit">수정하기</button>
-              <button type="button">취소</button>
-            </div>
-          </form>
-        </div>
+      <label for="nickname">닉네임</label>
+      <div class="input-group">
+        <input type="text" id="nickname" name="nickname" placeholder="닉네임 입력">
+        <button type="button">중복확인</button>
       </div>
 
-      <!--------------------- 팔로우 패널  -------------------->
-      <div id="follow-panel" class="content-panel hidden">
-        <div class="follow-wrapper">
-          <div class="follow-tabs">
-            <button class="tab-button active" data-target="following-list">팔로우(999)</button>
-            <button class="tab-button" data-target="follower-list">팔로워(999)</button>
-          </div>
-          <!-- 팔로우 목록 -->
-          <div id="following-list" class="follow-list">
-            <div class="follow-item">
-              <span class="nickname">프론트엔드 요정</span>
-              <button class="follow-toggle following">팔로잉</button>
-            </div>
-            <div class="follow-item">
-              <span class="nickname">프론트엔드 요정</span>
-              <button class="follow-toggle following">팔로잉</button>
-            </div>
-          </div>
-          <!-- 팔로워 목록 -->
-          <div id="follower-list" class="follow-list hidden">
-            <div class="follow-item">
-              <span class="nickname">코딩 입문자</span>
-              <button class="follow-toggle">팔로우</button>
-            </div>
-          </div>
-        </div>
+      <label for="email">이메일</label>
+      <div class="input-group">
+        <input type="email" id="email" name="email" placeholder="이메일 주소 입력">
+        <button type="button" id="emailVerifyBtn">이메일 인증</button>
       </div>
 
+      <!-- ✅ 인증번호 입력창: 이메일 아래 -->
+      <div id="verify-section" class="input-group" style="display:none; margin-top:8px;">
+        <input type="text" id="verify-code" placeholder="인증번호 입력">
+        <button type="button" id="verifyBtn">인증 확인</button>
+      </div>
+
+      <!-- ✅ 인증 완료 표시 -->
+      <p id="verify-status" style="color:green; font-weight:bold; display:none; margin-top:8px;">
+        이메일 인증 완료 ✅
+      </p>
+
+      <div class="form-actions">
+        <button type="submit">수정하기</button>
+        <button type="button">취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+      	<div id="follow-panel" class="content-panel hidden">
+    <div class="follow-wrapper">
+        <div class="follow-tabs">
+            <!-- data-list 속성 추가: JS에서 목록 로딩 타입을 구분하기 위해 사용 -->
+            <button class="tab-button active" data-list="following" data-target="following-list">
+                팔로잉(<span id="following-count">0</span>)
+            </button>
+            <button class="tab-button" data-list="follower" data-target="follower-list">
+                팔로워(<span id="follower-count">0</span>)
+            </button>
+        </div>
+        
+        <!-- 팔로잉 목록 (내가 팔로우 하는 사람) - UL 태그로 변경 -->
+        <ul id="following-list" class="follow-list active">
+            <li class="empty-message">데이터를 불러오는 중입니다...</li>
+        </ul>
+        
+        <!-- 팔로워 목록 (나를 팔로우 하는 사람) - 초기 숨김, UL 태그로 변경 -->
+        <ul id="follower-list" class="follow-list hidden">
+            <li class="empty-message">데이터를 불러오는 중입니다...</li>
+        </ul>
+    </div>
+</div>
       <!-----------------메세지 패널------------------------>
       <div id="messages-panel" class="content-panel hidden">
         <div class="panel-wrapper">
@@ -483,7 +140,7 @@
           <div class="message-title">
             <h2>
               <span class="title-text">📨 메세지함</span>
-              <span class="unread-badge">🔴 90</span>
+              <!-- <span class="unread-badge" id="message-unread-badge">🔴 90</span> -->
             </h2>
           </div>
         <!-- 선택 기능 영역 -->
@@ -492,7 +149,14 @@
             <label><input type="checkbox" id="select-all"> 전체 선택</label>
           </div>
           <div class="right-controls">
-            <button class="btn-delete-selected">선택 삭제</button>
+            <button class="btn-delete-selected-message" style="padding: 6px 12px;
+  font-size: 13px;
+  background: #ff4d4d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;">선택 삭제</button>
           </div>
         </div>
         <!--메시지 리스트 영역-->
@@ -509,7 +173,7 @@
             </div>
             <div class="message-actions">
               <button class="btn-more"onclick="viewMessage(123)">더보기</button>
-              <button class="btn-delete">삭제</button>
+              <button class="btn-delete" onclick="event.stopPropagation(); deleteMessage(456, this.closest('.message-item'))">삭제</button>
             </div>
           </div>
           <div class="message-item">
@@ -523,7 +187,7 @@
             </div>
             <div class="message-actions">
               <button class="btn-more"onclick="viewMessage(123)">더보기</button>
-              <button class="btn-delete">삭제</button>
+              <button class="btn-delete" onclick="event.stopPropagation(); deleteMessage(456, this.closest('.message-item'))">삭제</button>
             </div>
           </div>
         </div>
@@ -542,6 +206,16 @@
         </div>
         </div>
       </div>
+		 <!-- 메시지 삭제 확인 모달 -->
+		<div id="delete-confirm-modal" class="modal hidden">
+		  <div class="modal-content">
+		    <p>이 대화방을 삭제하시겠습니까?</p>
+		    <div class="modal-actions">
+		      <button id="modal-confirm-btn">확인</button>
+		      <button id="modal-cancel-btn">취소</button>
+		    </div>
+		  </div>
+		</div>
 
       <!--------------------포인트 패널-------------------->
       <div id="points-panel" class="content-panel hidden">
@@ -564,10 +238,10 @@
         <div id="point-history-section">
           <div class="point-controls">
             <div class="left-controls">
-              <label><input type="checkbox" id="select-all-points"> 전체 선택</label>
+              
             </div>
             <div class="right-controls">
-              <button class="btn-delete-selected">선택 삭제</button>
+              
             </div>
           </div>
           <table class="point-table">
@@ -580,7 +254,7 @@
                 <th>누적 포인트</th>
                 <th>활동 링크</th>
                 <th>상태</th>
-                <th>삭제</th>
+                
               </tr>
             </thead>
             <tbody>
@@ -592,7 +266,7 @@
                 <td>120</td>
                 <td><a href="#">바로가기</a></td>
                 <td>적립완료</td>
-                <td><button class="btn-delete">삭제</button></td>
+                
               </tr>
               <!-- 추가 행들 -->
             </tbody>
@@ -601,55 +275,44 @@
         </div>
       </div>
 
-      <!--------------------- 알림 패널 --------------------->
-      <div id="alerts-panel" class="content-panel hidden">
-        <div class="panel-wrapper">
-      <div class="notification-header-bar">
-        <h2>🔔 알림 내역</h2>
+ <!--------------------알림 패널-------------------->
+<!--------------------- 알림 패널 --------------------->
+<div id="alerts-panel" class="content-panel hidden">
+  <div class="panel-wrapper">
+
+    <!-- 상단 바 -->
+    <div class="point-top-bar">
+      <div class="point-tabs">
+        <button id="btn-alert-history" class="tab-btn active">알림 내역</button>
       </div>
-      <!-- 선택 기능 영역 -->
-      <div class="notification-controls">
-        <div class="left-controls">
-          <label><input type="checkbox" id="select-all-notifications"> 전체 선택</label>
-        </div>
-        <div class="right-controls">
-          <button class="btn-delete-selected">선택 삭제</button>
-        </div>
+      <div class="point-filters">
+        <button class="btn-delete-selected" style="background-color: #ff6b6b; color: white;">선택 삭제</button>
       </div>
-      <!-- 알림 테이블 -->
-      <table class="notification-table">
+    </div>
+
+    <!-- 알림 테이블 -->
+    <div id="alert-history-section">
+      <table class="point-table">
         <thead>
           <tr>
-            <th><input type="checkbox" disabled></th>
-            <th>알림 내용</th>
-            <th>유형</th>
-            <th>해당 링크</th>
-            <th>알림 시간</th>
+            <th><input type="checkbox" id="select-all-notifications"></th>
+            <th>알림일시</th>
+            <th>내용</th>
+            <th>타입</th>
+            <th>관련 게시글</th>
             <th>삭제</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="alert-tbody">
           <tr>
-            <td><input type="checkbox" class="notification-check"></td>
-            <td>지인이 회원님의 글에 댓글을 남겼습니다</td>
-            <td>댓글</td>
-            <td><a href="#">바로가기</a></td>
-            <td>2025-09-26 13:45</td>
-            <td><button class="btn-delete">삭제</button></td>
+            <td colspan="6" style="text-align:center; color:gray;">알림 내역을 불러오는 중...</td>
           </tr>
-          <tr>
-            <td><input type="checkbox" class="notification-check"></td>
-            <td>회원님의 게시물이 좋아요를 받았습니다</td>
-            <td>좋아요</td>
-            <td><a href="#">바로가기</a></td>
-            <td>2025-09-26 12:10</td>
-            <td><button class="btn-delete">삭제</button></td>
-          </tr>
-          <!-- 추가 알림 행들 -->
-         </tbody>
-        </table>
-        </div>
-      </div>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
 
       <!-------------------회원탈퇴 패널---------------------->
       <div id="withdraw-panel" class="content-panel hidden">
@@ -678,7 +341,7 @@
           <input type="text" id="withdraw-id" placeholder="아이디 입력">
           <input type="password" id="withdraw-pw" placeholder="비밀번호 입력">
           <div class="modal-buttons">
-            <button class="confirm" onclick="confirmWithdrawal()">확인</button>
+            <button class="confirm" >확인</button>
             <button class="cancel" onclick="closeWithdrawalPopup()">취소</button>
           </div>
         </div>
@@ -715,7 +378,7 @@
       <!---- 사이드바 ---->
         <div class="sidebar">
         <div class="ad-top">
-          <a href="https://광고페이지주소.com" target="_self">
+          <a href="https://www.eduwill.net/sites/home" target="_self">
             <img src="resources/img/adbaner.jpg" alt="광고 이미지">
           </a>
         </div>
@@ -723,7 +386,8 @@
         <!-- 탭 버튼 (실시간채팅 / 마이페이지) -->
         <div class="sidebar-tabs" role="tablist">
           <button class="tab-button" data-target="panel-chat" role="tab" aria-selected="false">실시간채팅</button>
-          <button class="tab-button active" data-target="panel-mypage" role="tab" aria-selected="true">마이페이지</button>
+          
+		<button class="tab-button active" data-target="panel-mypage" role="tab" aria-selected="true">마이페이지</button>
         </div>
 
         <!-- 탭 패널: 실시간채팅 -->
@@ -743,12 +407,15 @@
         </div>
 
         <!-- 탭 패널: 마이페이지 -->
+        
         <div class="tab-panel" id="panel-mypage" role="tabpanel">
           <!-- 목록은 스크롤 가능하도록 flex:1 -->
           <ul class="mypage-list" style="flex:1; overflow:auto;">
             <li data-target="posts-panel" class="selected"><a href="#">내 글 관리</a></li>
             <li data-target="edit-panel"><a href="#">정보수정</a></li>
-            <li data-target="follow-panel"><a href="#">팔로우 / 팔로워 관리</a></li>
+            
+           	<li data-target="follow-panel"><a href="#">팔로우 / 팔로워 관리</a></li>
+           	
             <li data-target="messages-panel"><a href="#">메세지</a></li>
             <li data-target="points-panel"><a href="#">포인트</a></li>
             <li data-target="alerts-panel"><a href="#">알림</a></li>
@@ -757,5 +424,27 @@
         </div>
         </div>
     </div>
+    
   </main>
+    <script>
+  async function invitation(senderId, recieverId){
+	const MESSAGE_API_BASE = location.origin + CONTEXT_PATH + '/message';
+	console.log(MESSAGE_API_BASE)
+	console.log(senderId, recieverId);
+	
+	const payload = {
+      senderId: senderId,
+      receiverId: recieverId // TODO: 실제 대화 상대 ID로 변경
+    };
+	
+	const res = await fetch(MESSAGE_API_BASE + "/invitation", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+     console.log(res);
+      
+}
+</script>
+<script src="${pageContext.request.contextPath}/resources/js/withdraw.js"></script>
 <%@ include file="/WEB-INF/views/include/tail.jsp"%>

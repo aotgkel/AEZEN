@@ -187,7 +187,7 @@
 	    SELECT board_dislike FROM board WHERE board_no = #{boardNo}
 	</select>
 	
-	<select id="selectBoardByCategory" parameterType="int" resultMap="board">
+	<select id="selectBoardByCategory" parameterType="map" resultMap="board">
 	    select
 	        board.*,
 	        comment_answer.*,
@@ -205,6 +205,9 @@
 	    where board.board_deleted = 0
 	      <if test="category != 0">
 	        and board.board_category = #{category}
+	      </if>
+	      <if test="id != null">
+	     	and user.id = #{id} 
 	      </if>
 	    <choose>
 	        <when test="sort == 'hit'">

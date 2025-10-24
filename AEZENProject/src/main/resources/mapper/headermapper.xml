@@ -21,5 +21,26 @@
 	        updated_at = updated_at
 	    WHERE id = #{id}
 	</update>
-
+	<insert id="signup" parameterType="com.aezen.www.vo.UserVO">
+		insert into user(id, name, nick, email, password)
+		values(#{id}, #{name}, #{nick}, #{email}, #{password});
+	</insert>
+	
+	<select id="countByUserid" parameterType="string" resultType="int">
+		select count(*) from user where id = #{userid};
+	</select>
+	
+	<select id="countByNickname" parameterType="string" resultType="int">
+		select count(*) from user where nick = #{nickname};
+	</select>
+	
+	<select id="countByEmail" parameterType="string" resultType="int">
+		select count(*) from user where email = #{email};
+	</select>
+	
+	<update id="updatePasswordByEmail" parameterType="java.util.Map">
+	    UPDATE user
+	    SET password = #{newPassword},  updated_at = NOW()
+	    WHERE email = #{email}         AND withdraw = 0
+	</update>
 </mapper>

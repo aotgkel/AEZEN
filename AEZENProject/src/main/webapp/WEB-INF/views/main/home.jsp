@@ -110,13 +110,13 @@
 					aria-hidden="true">
 					<!-- 목록은 스크롤 가능하도록 flex:1 -->
 					<ul class="mypage-list" style="flex: 1; overflow: auto;">
-						<li><a href="mypage.html?panel=posts">내 글 관리</a></li>
-						<li><a href="mypage.html?panel=edit">정보수정</a></li>
-						<li><a href="mypage.html?panel=follow">팔로우 / 팔로워 관리</a></li>
-						<li><a href="mypage.html?panel=messages">메세지</a></li>
-						<li><a href="mypage.html?panel=points">포인트</a></li>
-						<li><a href="mypage.html?panel=alerts">알림</a></li>
-						<li><a href="mypage.html?panel=withdraw">회원탈퇴</a></li>
+						<li><a href="mypage?panel=posts">내 글 관리</a></li>
+						<li><a href="mypage?panel=edit">정보수정</a></li>
+						<li><a href="mypage?panel=follow">팔로우 / 팔로워 관리</a></li>
+						<li><a href="mypage?panel=messages">메세지</a></li>
+						<li><a href="mypage?panel=points">포인트</a></li>
+						<li><a href="mypage?panel=alerts">알림</a></li>
+						<li><a href="mypage?panel=withdraw">회원탈퇴</a></li>
 					</ul>
 				</div>
 			</div>

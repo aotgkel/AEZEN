@@ -65,17 +65,23 @@ document.addEventListener('DOMContentLoaded', function () {
       useridMessage.textContent = '';
       return;
     }
-
-    const isEnglishOnly = /^[a-zA-Z]+$/.test(value);
-    if (!isEnglishOnly) {
-      useridMessage.textContent = '영문만 입력 가능합니다.';
+	const isEnglishOrNumber = /^[a-zA-Z0-9]+$/.test(value);
+	const isLengthValid = value.length >= 4 && value.length <= 12;
+	
+    if (!isEnglishOrNumber) {
+      useridMessage.textContent = '영문 또는 숫자만 입력 가능합니다.'; 
       useridMessage.style.color = '#d9534f';
       return;
     }
+    if (!isLengthValid) {
+      useridMessage.textContent = '아이디는 4자에서 12자 사이로 입력해야 합니다.';
+      useridMessage.style.color = '#d9534f';
+      return;
+    }    
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      fetch(`/check-userid?userid=${encodeURIComponent(value)}`)
+      fetch(`/AEZENProject/check-userid?userid=${encodeURIComponent(value)}`)
         .then(res => res.json())
         .then(data => {
           useridMessage.textContent = data.exists
@@ -101,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearTimeout(nicknameTimer);
     nicknameTimer = setTimeout(() => {
-      fetch(`/check-nickname?nickname=${encodeURIComponent(value)}`)
+      fetch(`/AEZENProject/check-nickname?nickname=${encodeURIComponent(value)}`)
         .then(res => res.json())
         .then(data => {
           nicknameMessage.textContent = data.exists
@@ -134,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearTimeout(emailTimer);
     emailTimer = setTimeout(() => {
-      fetch(`/check-email?email=${encodeURIComponent(value)}`)
+      fetch(`/AEZENProject/check-email?email=${encodeURIComponent(value)}`)
         .then(res => res.json())
         .then(data => {
           emailMessage.textContent = data.exists
@@ -148,18 +154,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, 500);
   });
-
-    // -------------------------------
-  // 회원가입 완료 알림 + 홈 이동
-  // -------------------------------
-  const form = document.querySelector('.post form');
-  if (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault(); // 서버로 보내지 않고 알림 + 이동 (서버 연동 시 제거)
-
-      alert('회원가입이 완료되었습니다.');
-      window.location.href = 'home.html';
-    });
-  }
-
 });

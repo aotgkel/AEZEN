@@ -1,6 +1,6 @@
 package com.aezen.www.vo;
 
-import java.time.LocalDateTime;
+
 
 /*
  * 클래스 기능 : 팔로우 정보 (follow 테이블)
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class FollowVO {
     private String followingId; // 팔로우를 요청한 사용자 ID (Primary Key 일부)
     private String followedId; // 팔로우를 당한 사용자 ID (Primary Key 일부)
-    private LocalDateTime followStartedAt; // 팔로우 시작 일시
+    private String followStartedAt; // 팔로우 시작 일시
 
     // =============================
     // Getters
@@ -22,7 +22,7 @@ public class FollowVO {
         return followedId;
     }
 
-    public LocalDateTime getFollowStartedAt() {
+    public String getFollowStartedAt() {
         return followStartedAt;
     }
 
@@ -38,7 +38,7 @@ public class FollowVO {
         this.followedId = followedId;
     }
 
-    public void setFollowStartedAt(LocalDateTime followStartedAt) {
+    public void setFollowStartedAt(String followStartedAt) {
         this.followStartedAt = followStartedAt;
     }
 }

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aezen.www.myboard">
+
+  <!-- ✅ 내 게시글 목록 (작성자 닉네임 포함) -->
+  <resultMap id="BoardWithUserMap" type="com.aezen.www.vo.BoardVO">
+    <id property="boardNo" column="board_no"/>
+    <result property="id" column="id"/>
+    <result property="nick" column="nick"/>
+    <result property="boardTitle" column="board_title"/>
+    <result property="boardContent" column="board_content"/>
+    <result property="boardCategory" column="board_category"/>
+    <result property="hit" column="hit"/>
+    <result property="boardLike" column="board_like"/>
+    <result property="boardDislike" column="board_dislike"/>
+    <result property="boardCreatedAt" column="board_created_at"/>
+    <result property="boardUpdatedAt" column="board_updated_at"/>
+    <result property="board_deleted" column="board_deleted"/>
+  </resultMap>
+
+  <select id="selectMyBoardListByUserId"
+          parameterType="string"
+          resultMap="BoardWithUserMap">
+    SELECT
+        b.board_no,
+        b.id,
+        u.nick,
+        b.board_title,
+        b.board_content,
+        b.board_category,
+        b.hit,
+        b.board_like,
+        b.board_dislike,
+        b.board_created_at,
+        b.board_updated_at,
+        b.board_deleted
+    FROM board b
+    JOIN `user` u ON b.id = u.id
+    WHERE b.board_deleted = 0
+      AND b.id = #{userId}
+    ORDER BY b.board_no DESC
+  </select>
+
+  <!-- ✅ 내 게시글 상세조회 (파일, 태그 포함) -->
+  <resultMap id="BoardDetailMap" type="com.aezen.www.vo.BoardVO">
+    <id property="boardNo" column="board_no"/>
+    <result property="id" column="id"/>
+    <result property="nick" column="nick"/>
+    <result property="boardTitle" column="board_title"/>
+    <result property="boardContent" column="board_content"/>
+    <result property="boardCategory" column="board_category"/>
+    <result property="hit" column="hit"/>
+    <result property="boardLike" column="board_like"/>
+    <result property="boardDislike" column="board_dislike"/>
+    <result property="boardCreatedAt" column="board_created_at"/>
+    <result property="boardUpdatedAt" column="board_updated_at"/>
+    <collection property="files" ofType="com.aezen.www.vo.FileVO"
+                column="board_no"
+                select="selectFilesByBoardNo"/>
+    <collection property="tags" ofType="com.aezen.www.vo.TagVO"
+                column="board_no"
+                select="selectTagsByBoardNo"/>
+  </resultMap>
+
+  <select id="selectMyBoardByNo"
+          parameterType="int"
+          resultMap="BoardDetailMap">
+    SELECT
+        b.board_no,
+        b.id,
+        u.nick,
+        b.board_title,
+        b.board_content,
+        b.board_category,
+        b.hit,
+        b.board_like,
+        b.board_dislike,
+        b.board_created_at,
+        b.board_updated_at
+    FROM board b
+    JOIN `user` u ON b.id = u.id
+    WHERE b.board_deleted = 0
+      AND b.board_no = #{boardNo}
+  </select>
+
+  <!-- ✅ 파일 리스트 -->
+  <select id="selectFilesByBoardNo"
+          parameterType="int"
+          resultType="com.aezen.www.vo.FileVO">
+    SELECT
+        file_no AS fileNo,
+        logical_file_name AS logicalFileName,
+        physical_file_name AS physicalFileName,
+        file_size AS fileSize,
+        file_ext AS fileExt,
+        board_no AS boardNo
+    FROM file
+    WHERE board_no = #{boardNo}
+  </select>
+
+  <!-- ✅ 태그 리스트 -->
+  <select id="selectTagsByBoardNo"
+          parameterType="int"
+          resultType="com.aezen.www.vo.TagVO">
+    SELECT
+        t.tag_no AS tagNo,
+        t.tag_name AS tagName,
+        t.created_at AS createdAt
+    FROM tag t
+    JOIN board_tag bt ON t.tag_no = bt.tag_no
+    WHERE bt.board_no = #{boardNo}
+  </select>
+
+  <!-- ✅ 내 게시글 삭제 -->
+  <update id="deleteMyBoard" parameterType="int">
+    UPDATE board
+    SET board_deleted = 1
+    WHERE board_no = #{boardNo}
+      AND board_deleted = 0
+  </update>
+
+  <!-- ✅ 내 게시글 개수 -->
+  <select id="countMyBoards"
+          parameterType="string"
+          resultType="int">
+    SELECT COUNT(*)
+    FROM board
+    WHERE board_deleted = 0
+      AND id = #{userId}
+  </select>
+
+</mapper>

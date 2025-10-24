@@ -9,8 +9,8 @@ import java.util.List;
 public class BoardVO {
     private int boardNo; // 게시글 번호 (Primary Key)
     private String id; // 작성자 ID
-    private String nick; // 작성자 nick
-	private String boardTitle; // 게시글 제목
+    private String nick;
+    private String boardTitle; // 게시글 제목
     private String boardContent; // 게시글 내용
     private Integer boardCategory; // 게시글 카테고리 (NULLable)
     private int hit; // 조회수
@@ -34,10 +34,6 @@ public class BoardVO {
     public String getId() {
         return id;
     }
-    
-    public String getNick() {
-		return nick;
-	}
 
     public String getBoardTitle() {
         return boardTitle;
@@ -97,10 +93,6 @@ public class BoardVO {
     public void setId(String id) {
         this.id = id;
     }
-    
-	public void setNick(String nick) {
-		this.nick = nick;
-	}
 
     public void setBoardTitle(String boardTitle) {
         this.boardTitle = boardTitle;
@@ -148,6 +140,14 @@ public class BoardVO {
 
 	public void setTags(List<TagVO> tags) {
 		this.tags = tags;
+	}
+
+	public String getNick() {
+		return nick;
+	}
+
+	public void setNick(String nick) {
+		this.nick = nick;
 	}
     
 }
